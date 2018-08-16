@@ -2,6 +2,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include "trace_pixel.cu"
 
 void render_images(int x_dim, int y_dim, int t_dim);
