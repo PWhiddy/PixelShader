@@ -90,7 +90,7 @@ void render_images(int x_dim, int y_dim, int t_dim) {
             img, 
             x_dim, 
             y_dim, 
-            "output/F" + pad_number(f+1) + ".ppm"
+            "output/F" + pad_number(time_step+1) + ".ppm"
         );
     }
 
@@ -99,8 +99,6 @@ void render_images(int x_dim, int y_dim, int t_dim) {
 
     printf("CUDA: %s\n", cudaGetErrorString( cudaGetLastError() ));
     cudaThreadExit();
-
-    return 0;
 }
 
 std::string pad_number(int n)
