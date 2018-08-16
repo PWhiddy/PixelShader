@@ -2,17 +2,17 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <iomanip>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "trace_pixel.cu"
 
 void render_images(int x_dim, int y_dim, int t_dim);
-void save_image(uint8_t *pixels, int3 img_dims, std::string name);
+void save_image(uint8_t *pixels, int x_dim, int y_dim, std::string name);
 std::string pad_number(int n);
 
 int main(int argc, char* args[])
 {
-
     if (argc == 4)
     {
         std::istringstream x_string( args[1] );
@@ -40,11 +40,11 @@ int main(int argc, char* args[])
     return 0;
 }
 
-render_images(int x_dim, int y_dim, int t_dim) {
+void render_images(int x_dim, int y_dim, int t_dim) {
 
     uint8_t *img = new uint8_t[3*x_dim*y_dim];
 
-    dim3 block_size(32,32,1)
+    dim3 block_size(32,32,1);
     dim3 image_grid(
         (x_dim+block_size.x-1)/block_size.x, 
         (y_dim+block_size.y-1)/block_size.y, 1);
@@ -55,7 +55,7 @@ render_images(int x_dim, int y_dim, int t_dim) {
 
     for (int time_step = 0; time_step < t_dim; time_step++) {
         
-        std::cout << "Step " << f+1 << "\n";
+        std::cout << "Step " << time_step+1 << "\n";
 
         float measured_time=0.0f;
         cudaEvent_t start, stop;
