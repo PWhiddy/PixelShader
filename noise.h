@@ -35,7 +35,7 @@ float simplex_noise(float3 p)
     float3 d2 = d0 - (i2 - 2.0f * K2);
     float3 d3 = d0 - (1.0 - 3.0f * K2);
     
-    float4 h = max(0.6 - make_float4(dot(d0, d0), dot(d1, d1), dot(d2, d2), dot(d3, d3)), 0.0f);
+    float4 h = max(0.6f - make_float4(dot(d0, d0), dot(d1, d1), dot(d2, d2), dot(d3, d3)), 0.0f);
     float4 n = h * h * h * h * make_float4(dot(d0, hash33(i)), dot(d1, hash33(i + i1)), dot(d2, hash33(i + i2)), dot(d3, hash33(i + 1.0)));
     
     return dot(make_float4(31.316), n);
