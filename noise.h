@@ -1,19 +1,15 @@
 #include "cutil_math.h"
 
-//#define MOD3 make_float3(.1031,.11369,.13787)
-//#define MOD3 float3(443.8975,397.2973, 491.1871)
-const float3 MOD3 = make_float3(.1031,.11369,.13787);
-
 __device__ float hash31(float3 p3)
 {
-	p3  = fract(p3 * MOD3);
+	p3  = fract(p3 * make_float3(.1031,.11369,.13787));
     p3 += dot(p3, make_float3(p3.y,p3.z,p3.x) + 19.19);
     return -1.0f + 2.0f * fract((p3.x + p3.y) * p3.z);
 }
 
 __device__ float3 hash33(float3 p3)
 {
-	p3 = fract(p3 * MOD3);
+	p3 = fract(p3 * make_float3(.1031,.11369,.13787));
     p3 += dot(p3, make_float3(p3.y,p3.x,p3.z)+19.19);
     return -1.0f + 2.0f * fract(make_float3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
 }
