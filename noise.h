@@ -1,4 +1,4 @@
-#include "cutil_math.cuh"
+#include "cutil_math.h"
 
 //#define MOD3 make_float3(.1031,.11369,.13787)
 //#define MOD3 float3(443.8975,397.2973, 491.1871)

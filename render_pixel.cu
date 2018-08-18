@@ -1,4 +1,4 @@
-#include "noise_functions.cuh"
+#include "noise.h"
 
 __device__ float2 rotate(float2 p, float a)
 {
