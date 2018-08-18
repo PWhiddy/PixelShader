@@ -1,9 +1,26 @@
-#include "cutil_math.h"
+#include "noise_functions.cuh"
 
 __device__ float2 rotate(float2 p, float a)
 {
     return make_float2(p.x*cos(a) - p.y*sin(a),
                        p.y*cos(a) + p.x*sin(a));
+}
+
+__device__ float sdSphere(float3 p, float r) {
+    return length(p)-r;
+}
+
+float3 calcNormal( float3 pos )
+{
+    float2 e = make_float2(1.0,-1.0)*0.5773*0.0005;
+    return normalize( make_float3(e.x,e.y,e.y)*map( pos + make_float3(e.x,e.y,e.y) ) + 
+					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x) ) + 
+					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y) ) + 
+					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x) ) );
+}
+
+__device__ float map(float3 p) {
+    return sdSphere(p, 0.2);
 }
 
 __global__ void render_pixel ( 
@@ -23,6 +40,8 @@ __global__ void render_pixel (
     float uvy = -float(y)/float(y_dim)+0.5;
     uvx *= float(x_dim)/float(y_dim);     
 
+    float3 light_dir = make_float3(0.1, 1.0, 0.05);
+
     // Set up ray originating from camera
     float3 ray_pos = make_float3(0.0, 0.0, -1.0);
     float2 pos_rot = rotate(make_float2(ray_pos.x, ray_pos.z), 0.0);
@@ -32,6 +51,17 @@ __global__ void render_pixel (
     float2 dir_rot = rotate(make_float2(ray_dir.x, ray_dir.z), 0.0);
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
+
+    for (int i=0; i<48; i++) {
+        float dist = map(ray_pos, 0.2);
+        if (dist < 0.01 || dist > 100.0) break;
+        ray_pos += dist * ray_dir * 0.9;
+    }
+
+    float3 normal = calcNormal(ray_pos);
+    float value = dot(normal,light_dir);
+    float3 color = make_float3(value, 1.0-2.0*value, 0.0);
+
     /*
     const float3 dir_to_light = normalize(light_dir);
     const float occ_thresh = 0.001;
@@ -63,7 +93,7 @@ __global__ void render_pixel (
     light_accum = pow(light_accum, 0.45);
     */
     const int pixel = 3*(y*x_dim+x);
-    image[pixel+0] = (uint8_t)(fmin(255.0*uvx, 255.0));
-    image[pixel+1] = (uint8_t)(fmin(255.0*uvy, 255.0));
-    image[pixel+2] = (uint8_t)(fmin(255.0*(0.5*sin(uvx)+0.5), 255.0));
+    image[pixel+0] = (uint8_t)(fmin(255.0*color.r, 255.0));
+    image[pixel+1] = (uint8_t)(fmin(255.0*color.g, 255.0));
+    image[pixel+2] = (uint8_t)(fmin(255.0*color.b, 255.0));
 }

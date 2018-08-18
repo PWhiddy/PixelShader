@@ -69,6 +69,10 @@ inline __device__ __host__ float clamp(float f, float a, float b)
     return fmaxf(a, fminf(f, b));
 }
 
+inline __device__ __host__ float fract(float f) {
+    return f-floor(f);
+}
+
 // int2 functions
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -236,6 +240,11 @@ inline __host__ __device__ float2 floor(const float2 v)
     return make_float2(floor(v.x), floor(v.y));
 }
 
+inline __host__ __device__ float2 fract(const float2 v)
+{
+    return v-floor(v);
+}
+
 // reflect
 inline __host__ __device__ float2 reflect(float2 i, float2 n)
 {
@@ -375,6 +384,11 @@ inline __device__ __host__ float3 clamp(float3 v, float3 a, float3 b)
     return make_float3(clamp(v.x, a.x, b.x), clamp(v.y, a.y, b.y), clamp(v.z, a.z, b.z));
 }
 
+inline __device__ __host__ float3 step(float3 a, float3 b)
+{
+    return make_float3(b.x < a.x ? 0.0 : 1.0, b.y < a.y ? 0.0 : 1.0, b.y < a.y ? 0.0 : 1.0);
+}
+
 // dot product
 inline __host__ __device__ float dot(float3 a, float3 b)
 { 
@@ -404,6 +418,11 @@ inline __host__ __device__ float3 normalize(float3 v)
 inline __host__ __device__ float3 floor(const float3 v)
 {
     return make_float3(floor(v.x), floor(v.y), floor(v.z));
+}
+
+inline __host__ __device__ float3 fract(const float3 v)
+{
+    return v-floor(v);
 }
 
 // reflect
@@ -552,6 +571,11 @@ inline __host__ __device__ float4 normalize(float4 v)
 inline __host__ __device__ float4 floor(const float4 v)
 {
     return make_float4(floor(v.x), floor(v.y), floor(v.z), floor(v.w));
+}
+
+inline __host__ __device__ float4 fract(const float4 v)
+{
+    return v-floor(v);
 }
 
 // absolute value
