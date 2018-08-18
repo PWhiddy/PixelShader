@@ -93,7 +93,7 @@ __global__ void render_pixel (
     light_accum = pow(light_accum, 0.45);
     */
     const int pixel = 3*(y*x_dim+x);
-    image[pixel+0] = (uint8_t)(fmin(255.0*color.r, 255.0));
-    image[pixel+1] = (uint8_t)(fmin(255.0*color.g, 255.0));
-    image[pixel+2] = (uint8_t)(fmin(255.0*color.b, 255.0));
+    image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
+    image[pixel+1] = (uint8_t)(fmin(255.0*color.y, 255.0));
+    image[pixel+2] = (uint8_t)(fmin(255.0*color.z, 255.0));
 }

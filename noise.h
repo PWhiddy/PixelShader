@@ -7,15 +7,15 @@ constexpr float3 MOD3 = make_float3(.1031,.11369,.13787);
 float hash31(float3 p3)
 {
 	p3  = fract(p3 * MOD3);
-    p3 += dot(p3, p3.yzx + 19.19);
-    return -1.0 + 2.0 * fract((p3.x + p3.y) * p3.z);
+    p3 += dot(p3, make_float3(p3.y,p3.z,p3.x) + 19.19);
+    return -1.0f + 2.0f * fract((p3.x + p3.y) * p3.z);
 }
 
 float3 hash33(float3 p3)
 {
 	p3 = fract(p3 * MOD3);
-    p3 += dot(p3, p3.yxz+19.19);
-    return -1.0 + 2.0 * fract(make_float3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
+    p3 += dot(p3, make_float3(p3.y,p3.x,p3.z)+19.19);
+    return -1.0f + 2.0f * fract(make_float3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
 }
 
 float simplex_noise(float3 p)
@@ -28,8 +28,8 @@ float simplex_noise(float3 p)
     
     // thx nikita: https://www.shadertoy.com/view/XsX3zB
     float3 e = step(make_float3(0.0), d0 - d0.yzx);
-	float3 i1 = e * (1.0 - e.zxy);
-	float3 i2 = 1.0 - e.zxy * (1.0 - e);
+	float3 i1 = e * (1.0 - make_float3(e.z,e.x,e.y));
+	float3 i2 = 1.0 - make_float3(e.z,e.x,e.y) * (1.0 - e);
     
     float3 d1 = d0 - (i1 - 1.0 * K2);
     float3 d2 = d0 - (i2 - 2.0 * K2);
