@@ -4,21 +4,21 @@
 //#define MOD3 float3(443.8975,397.2973, 491.1871)
 const float3 MOD3 = make_float3(.1031,.11369,.13787);
 
-float hash31(float3 p3)
+__device__ float hash31(float3 p3)
 {
 	p3  = fract(p3 * MOD3);
     p3 += dot(p3, make_float3(p3.y,p3.z,p3.x) + 19.19);
     return -1.0f + 2.0f * fract((p3.x + p3.y) * p3.z);
 }
 
-float3 hash33(float3 p3)
+__device__ float3 hash33(float3 p3)
 {
 	p3 = fract(p3 * MOD3);
     p3 += dot(p3, make_float3(p3.y,p3.x,p3.z)+19.19);
     return -1.0f + 2.0f * fract(make_float3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
 }
 
-float simplex_noise(float3 p)
+__device__ float simplex_noise(float3 p)
 {
     const float K1 = 0.333333333f;
     const float K2 = 0.166666667f;

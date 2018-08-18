@@ -14,7 +14,7 @@ __device__ float map(float3 p) {
     return sdSphere(p, 0.2);
 }
 
-float3 calcNormal( float3 pos )
+__device__ float3 calcNormal( float3 pos )
 {
     float2 e = make_float2(1.0,-1.0)*0.5773*0.0005;
     return normalize( make_float3(e.x,e.y,e.y)*map( pos + make_float3(e.x,e.y,e.y) ) + 
