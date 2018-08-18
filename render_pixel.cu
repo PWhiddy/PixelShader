@@ -10,6 +10,10 @@ __device__ float sdSphere(float3 p, float r) {
     return length(p)-r;
 }
 
+__device__ float map(float3 p) {
+    return sdSphere(p, 0.2);
+}
+
 float3 calcNormal( float3 pos )
 {
     float2 e = make_float2(1.0,-1.0)*0.5773*0.0005;
@@ -17,10 +21,6 @@ float3 calcNormal( float3 pos )
 					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x) ) + 
 					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y) ) + 
 					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x) ) );
-}
-
-__device__ float map(float3 p) {
-    return sdSphere(p, 0.2);
 }
 
 __global__ void render_pixel ( 
@@ -53,7 +53,7 @@ __global__ void render_pixel (
     ray_dir.z = dir_rot.y;
 
     for (int i=0; i<48; i++) {
-        float dist = map(ray_pos, 0.2);
+        float dist = map(ray_pos);
         if (dist < 0.01 || dist > 100.0) break;
         ray_pos += dist * ray_dir * 0.9;
     }

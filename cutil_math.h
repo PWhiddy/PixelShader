@@ -309,9 +309,18 @@ inline __host__ __device__ float3 operator+(float3 a, float b)
 {
     return make_float3(a.x + b, a.y + b, a.z + b);
 }
+inline __host__ __device__ float3 operator+(float b, float3 a)
+{
+    return make_float3(a.x + b, a.y + b, a.z + b);
+}
 inline __host__ __device__ void operator+=(float3 &a, float3 b)
 {
     a.x += b.x; a.y += b.y; a.z += b.z;
+}
+
+inline __host__ __device__ void operator+=(float3 &a, float b)
+{
+    a.x += b; a.y += b; a.z += b;
 }
 
 // subtract
@@ -500,6 +509,10 @@ inline __host__ __device__ void operator-=(float4 &a, float4 b)
 inline __host__ __device__ float4 operator*(float4 a, float s)
 {
     return make_float4(a.x * s, a.y * s, a.z * s, a.w * s);
+}
+inline __host__ __device__ float4 operator*(float4 a, float4 s)
+{
+    return make_float4(a.x * s.x, a.y * s.y, a.z * s.z, a.w * s.w);
 }
 inline __host__ __device__ float4 operator*(float s, float4 a)
 {
