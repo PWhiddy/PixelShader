@@ -11,7 +11,7 @@ __device__ float sdSphere(float3 p, float r) {
 }
 
 __device__ float map(float3 p) {
-    return sdSphere(p, 0.2)+fractalNoise(p)*0.1;
+    return sdSphere(p, 0.2)+fractalNoise(0.3*p)*0.1;
 }
 
 __device__ float3 calcNormal( float3 pos )
@@ -70,7 +70,9 @@ __global__ void render_pixel (
 
     float3 normal = calcNormal(ray_pos);
     float value = dot(normal,light_dir);
-    float3 color = make_float3(value, 1.0-2.0*value, 0.0);
+    float3 color = make_float3(value, value, value);
+    if (length(ray_pos > 10.0)) color = make_float3(0.0);
+
 
     /*
     const float3 dir_to_light = normalize(light_dir);
