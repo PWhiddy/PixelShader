@@ -10,6 +10,16 @@ __device__ float sdSphere(float3 p, float r) {
     return length(p)-r;
 }
 
+__device__ float fractalNoise(float3 p) {
+    float result = 0.0f;
+    result += simplex_noise(p*1.0) * 1.0f;
+    result += simplex_noise(p*2.0) * 0.5f;
+    result += simplex_noise(p*4.0) * 0.25f;
+    result += simplex_noise(p*8.0) * 0.125f;
+    result += simplex_noise(p*16.0) * 0.0625f;
+    return result;
+}
+
 __device__ float map(float3 p) {
     return sdSphere(p, 0.2)+fractalNoise(0.3*p)*0.1;
 }
@@ -21,16 +31,6 @@ __device__ float3 calcNormal( float3 pos )
 					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x) ) + 
 					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y) ) + 
 					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x) ) );
-}
-
-__device__ float fractalNoise(float3 p) {
-    float result = 0.0f;
-    result += simplex_noise(p*1.0) * 1.0f;
-    result += simplex_noise(p*2.0) * 0.5f;
-    result += simplex_noise(p*4.0) * 0.25f;
-    result += simplex_noise(p*8.0) * 0.125f;
-    result += simplex_noise(p*16.0) * 0.0625f;
-    return result;
 }
 
 __global__ void render_pixel ( 
@@ -71,7 +71,7 @@ __global__ void render_pixel (
     float3 normal = calcNormal(ray_pos);
     float value = dot(normal,light_dir);
     float3 color = make_float3(value, value, value);
-    if (length(ray_pos > 10.0)) color = make_float3(0.0);
+    if (length(ray_pos) > 10.0) color = make_float3(0.0);
 
 
     /*
