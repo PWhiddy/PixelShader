@@ -81,7 +81,7 @@ void render_images(int x_dim, int y_dim, int t_dim) {
             );
     
             cudaMemcpy( 
-                img+y_offset*x_dim, 
+                img+(3*y_offset*x_dim), 
                 device_img, 
                 img_bytes, 
                 cudaMemcpyDeviceToHost
