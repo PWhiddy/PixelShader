@@ -21,13 +21,13 @@ __device__ float sdBox( float3 p, float3 b )
 __device__ float fractalNoise(float3 p) {
     p += 300.0f;
     float result = 0.0f;
-    result += cudaNoise::simplexNoise(p*1.0, 1.0, 123) * 1.0f;
-    result += cudaNoise::simplexNoise(p*2.0, 1.0, 123) * 0.5f;
-    result += cudaNoise::simplexNoise(p*4.0, 1.0, 123) * 0.25f;
-    result += cudaNoise::simplexNoise(p*8.0, 1.0, 123) * 0.125f;
-    result += cudaNoise::simplexNoise(p*16.0, 1.0, 123) * 0.0625f;
-    result += cudaNoise::simplexNoise(p*32.0, 1.0, 123) * 0.03125f;
-    result += cudaNoise::simplexNoise(p*64.0, 1.0, 123) * 0.015625f;
+    result += rng::simplexNoise(p*1.0, 1.0, 123) * 1.0f;
+    result += rng::simplexNoise(p*2.0, 1.0, 123) * 0.5f;
+    result += rng::simplexNoise(p*4.0, 1.0, 123) * 0.25f;
+    result += rng::simplexNoise(p*8.0, 1.0, 123) * 0.125f;
+    result += rng::simplexNoise(p*16.0, 1.0, 123) * 0.0625f;
+    result += rng::simplexNoise(p*32.0, 1.0, 123) * 0.03125f;
+    result += rng::simplexNoise(p*64.0, 1.0, 123) * 0.015625f;
     return result;
 }
 
@@ -87,7 +87,7 @@ __global__ void render_pixel (
     float value = dot(normal,light_dir);
     float3 color = make_float3(value, value, value);
     if (length(ray_pos) > 10.0) color = background;
-    //color = make_float3(cudaNoise::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
+    //color = make_float3(rng::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
 
     /*
     const float3 dir_to_light = normalize(light_dir);

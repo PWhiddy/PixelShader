@@ -7,7 +7,7 @@
 
 #include <cuda_runtime.h>
 
-namespace cudaNoise {
+namespace rng {
 
 // Basis functions
 typedef enum {
