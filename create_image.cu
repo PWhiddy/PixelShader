@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <omp.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "render_pixel.cu"
@@ -44,47 +45,61 @@ void render_images(int x_dim, int y_dim, int t_dim) {
 
     uint8_t *img = new uint8_t[3*x_dim*y_dim];
 
-    dim3 block_size(32,32,1);
-    dim3 image_grid(
-        (x_dim+block_size.x-1)/block_size.x, 
-        (y_dim+block_size.y-1)/block_size.y, 1);
-
-    int img_bytes = 3 * sizeof(uint8_t) * x_dim * y_dim;
-    uint8_t *device_img;
-    cudaMalloc( (void**) &device_img, img_bytes );
-
     for (int time_step = 0; time_step < t_dim; time_step++) {
         
         std::cout << "Step " << time_step+1 << "\n";
 
-        float measured_time=0.0f;
-        cudaEvent_t start, stop;
-        cudaEventCreate( &start );
-        cudaEventCreate( &stop  );
-        cudaEventRecord( start, 0 );
+        int num_devices = 0;
+        cudaGetDeviceCount( &num_devices );
+        #pragma omp parallel num_threads( num_devices )
+        {
+            int dev_id = omp_get_thread_num();
+            cudaSetDevice( dev_id );
 
-        render_pixel<<<image_grid, block_size>>>(
-            device_img,
-            x_dim,
-            y_dim,
-            time_step
-        );
+            float measured_time=0.0f;
+            cudaEvent_t start, stop;
+            cudaEventCreate( &start );
+            cudaEventCreate( &stop  );
+            cudaEventRecord( start, 0 );
 
-        cudaMemcpy( 
-            img, 
-            device_img, 
-            img_bytes, 
-            cudaMemcpyDeviceToHost
-        );
+            int y_offset = dev_id*(y_dim/num_devices);
+            dim3 block_size(32,32,1);
+            dim3 image_grid(
+                (x_dim+block_size.x-1)/block_size.x, 
+                ((y_dim+block_size.y-1)/block_size.y)/num_devices, 1);
+        
+            int img_bytes = (3 * sizeof(uint8_t) * x_dim * y_dim)/num_devices;
+            uint8_t *device_img;
+            cudaMalloc( (void**) &device_img, img_bytes );
 
-        cudaEventRecord( stop, 0 );
-        cudaThreadSynchronize();
-        cudaEventElapsedTime( &measured_time, start, stop );
+            render_pixel<<<image_grid, block_size>>>(
+                device_img,
+                x_dim,
+                y_dim,
+                time_step,
+                y_offset
+            );
+    
+            cudaMemcpy( 
+                img+y_offset*x_dim, 
+                device_img, 
+                img_bytes, 
+                cudaMemcpyDeviceToHost
+            );
 
-        cudaEventDestroy( start );
-        cudaEventDestroy( stop );
+            cudaFree(device_img);
 
-        std::cout << "Render Time: " << measured_time << "\n";
+            cudaEventRecord( stop, 0 );
+            //cudaThreadSynchronize();
+            cudaEventElapsedTime( &measured_time, start, stop );
+    
+            cudaEventDestroy( start );
+            cudaEventDestroy( stop );
+    
+            std::cout << "GPU: " << dev_id <<  " Render Time: " << measured_time << "ms\n";
+
+        }
+
 
         save_image(
             img, 
@@ -94,7 +109,6 @@ void render_images(int x_dim, int y_dim, int t_dim) {
         );
     }
 
-    cudaFree(device_img);
     delete[] img;
 
     printf("CUDA: %s\n", cudaGetErrorString( cudaGetLastError() ));
