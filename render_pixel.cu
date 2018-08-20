@@ -34,7 +34,7 @@ __device__ float fractalNoise(float3 p) {
 __device__ float map(float3 p, float t) {
     float d;
     d =  sdSphere(p, 0.8)/*+(sin(38.0*p.x)+sin(47.0*p.y)+sin(21.0*p.z))*0.1*/+(t*0.0003)*(t*0.0018)*fractalNoise(p*2.5);
-    //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
+    d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
 
@@ -45,6 +45,16 @@ __device__ float3 calcNormal( float3 pos, float t )
 					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x), t ) + 
 					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y), t ) + 
 					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x), t ) );
+}
+
+__device__ float3 intersect(float3 ray_pos, float3 ray_dir, float t)
+{
+    for (int i=0; i<1024; i++) {
+        float dist = map(ray_pos, time);
+        if (dist < 0.002 || dist > 100.0) break;
+        ray_pos += dist * ray_dir * 0.15;
+    }
+    return ray_pos;
 }
 
 __global__ void render_pixel ( 
@@ -76,11 +86,7 @@ __global__ void render_pixel (
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
 
-    for (int i=0; i<1024; i++) {
-        float dist = map(ray_pos, time);
-        if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.15;
-    }
+    ray_pos = intersect(ray_pos, ray_dir, time);
 
     float3 background = make_float3(0.87);
     float3 normal = calcNormal(ray_pos, time);
