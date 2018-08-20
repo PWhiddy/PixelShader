@@ -33,7 +33,7 @@ __device__ float fractalNoise(float3 p) {
 
 __device__ float map(float3 p, float t) {
     float d;
-    d =  sdSphere(p, 0.8)/*+(sin(38.0*p.x)+sin(47.0*p.y)+sin(21.0*p.z))*0.1*/+(t*0.0003)*(t*0.0018)*fractalNoise(p*2.5);
+    d =  sdSphere(p, 0.8)+(t*0.0003)*(t*0.0018)*fractalNoise(p*2.5);
     d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
@@ -86,6 +86,9 @@ __global__ void render_pixel (
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
 
+    float3 color = make_float3(0.95);
+    const int bounces = 6;
+    
     ray_pos = intersect(ray_pos, ray_dir, time);
 
     float3 background = make_float3(0.87);
