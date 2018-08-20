@@ -31,20 +31,20 @@ __device__ float fractalNoise(float3 p) {
     return result;
 }
 
-__device__ float map(float3 p) {
+__device__ float map(float3 p, float t) {
     float d;
     d =  sdSphere(p, 0.8)/*+(sin(38.0*p.x)+sin(47.0*p.y)+sin(21.0*p.z))*0.1*/+0.03*fractalNoise(p*2.5);
     //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
 
-__device__ float3 calcNormal( float3 pos )
+__device__ float3 calcNormal( float3 pos, float t )
 {
     float2 e = make_float2(1.0,-1.0)*0.5773*0.0005;
-    return normalize( make_float3(e.x,e.y,e.y)*map( pos + make_float3(e.x,e.y,e.y) ) + 
-					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x) ) + 
-					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y) ) + 
-					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x) ) );
+    return normalize( make_float3(e.x,e.y,e.y)*map( pos + make_float3(e.x,e.y,e.y), t ) + 
+					  make_float3(e.y,e.y,e.x)*map( pos + make_float3(e.y,e.y,e.x), t ) + 
+					  make_float3(e.y,e.x,e.y)*map( pos + make_float3(e.y,e.x,e.y), t ) + 
+					  make_float3(e.x,e.x,e.x)*map( pos + make_float3(e.x,e.x,e.x), t ) );
 }
 
 __global__ void render_pixel ( 
@@ -83,7 +83,7 @@ __global__ void render_pixel (
     }
 
     float3 background = make_float3(0.87);
-    float3 normal = calcNormal(ray_pos);
+    float3 normal = calcNormal(ray_pos, time);
     float value = dot(normal,light_dir);
     float3 color = make_float3(value, value, value);
     if (length(ray_pos) > 10.0) color = background;
