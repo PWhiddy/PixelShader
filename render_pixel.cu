@@ -1,4 +1,6 @@
-#include "noise.h"
+//#include "noise.h"
+#include "cuda_noise.h"
+#include "cutil_math.h"
 
 __device__ float2 rotate(float2 p, float a)
 {
@@ -10,18 +12,30 @@ __device__ float sdSphere(float3 p, float r) {
     return length(p)-r;
 }
 
+__device__ float sdBox( float3 p, float3 b )
+{
+      float3 d = fabs(p) - b;
+      return fminf(fmaxf(d.x,fmaxf(d.y,d.z)),0.0f) + length(fmaxf(d,make_float3(0.0f)));
+}
+
 __device__ float fractalNoise(float3 p) {
+    p += 300.0f;
     float result = 0.0f;
-    result += simplex_noise(p*1.0) * 1.0f;
-    result += simplex_noise(p*2.0) * 0.5f;
-    result += simplex_noise(p*4.0) * 0.25f;
-    result += simplex_noise(p*8.0) * 0.125f;
-    result += simplex_noise(p*16.0) * 0.0625f;
+    result += cudaNoise::simplexNoise(p*1.0, 1.0, 123) * 1.0f;
+    result += cudaNoise::simplexNoise(p*2.0, 1.0, 123) * 0.5f;
+    result += cudaNoise::simplexNoise(p*4.0, 1.0, 123) * 0.25f;
+    result += cudaNoise::simplexNoise(p*8.0, 1.0, 123) * 0.125f;
+    result += cudaNoise::simplexNoise(p*16.0, 1.0, 123) * 0.0625f;
+    result += cudaNoise::simplexNoise(p*32.0, 1.0, 123) * 0.03125f;
+    result += cudaNoise::simplexNoise(p*64.0, 1.0, 123) * 0.015625f;
     return result;
 }
 
 __device__ float map(float3 p) {
-    return sdSphere(p, 0.2)+fractalNoise(0.3*p)*0.1;
+    float d;
+    d =  sdSphere(p, 0.7)/*+(sin(38.0*p.x)+sin(47.0*p.y)+sin(21.0*p.z))*0.1*/+0.1*fractalNoise(p*2.5);
+    d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
+    return d;
 }
 
 __device__ float3 calcNormal( float3 pos )
@@ -50,10 +64,10 @@ __global__ void render_pixel (
     float uvy = -float(y)/float(y_dim)+0.5;
     uvx *= float(x_dim)/float(y_dim);     
 
-    float3 light_dir = make_float3(0.1, 1.0, 0.05);
+    float3 light_dir = normalize(make_float3(0.1, 1.0, -0.5));
 
     // Set up ray originating from camera
-    float3 ray_pos = make_float3(0.0, 0.0, -1.0);
+    float3 ray_pos = make_float3(0.0, 0.0, -1.5);
     float2 pos_rot = rotate(make_float2(ray_pos.x, ray_pos.z), 0.0);
     ray_pos.x = pos_rot.x;
     ray_pos.z = pos_rot.y;
@@ -62,17 +76,18 @@ __global__ void render_pixel (
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
 
-    for (int i=0; i<256; i++) {
+    for (int i=0; i<1024; i++) {
         float dist = map(ray_pos);
-        if (dist < 0.01 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.2;
+        if (dist < 0.002 || dist > 100.0) break;
+        ray_pos += dist * ray_dir * 0.15;
     }
 
+    float3 background = make_float3(0.87);
     float3 normal = calcNormal(ray_pos);
     float value = dot(normal,light_dir);
     float3 color = make_float3(value, value, value);
-    if (length(ray_pos) > 10.0) color = make_float3(0.0);
-
+    if (length(ray_pos) > 10.0) color = background;
+    //color = make_float3(cudaNoise::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
 
     /*
     const float3 dir_to_light = normalize(light_dir);
