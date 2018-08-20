@@ -77,7 +77,7 @@ __global__ void render_pixel (
     ray_dir.z = dir_rot.y;
 
     for (int i=0; i<1024; i++) {
-        float dist = map(ray_pos);
+        float dist = map(ray_pos, time);
         if (dist < 0.002 || dist > 100.0) break;
         ray_pos += dist * ray_dir * 0.15;
     }
