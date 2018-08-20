@@ -61,7 +61,8 @@ __global__ void render_pixel (
     uint8_t *image, 
     int x_dim, 
     int y_dim, 
-    int time_step
+    int time_step,
+    int y_offset
 ){
     const int x = blockDim.x*blockIdx.x+threadIdx.x;
     const int y = blockDim.y*blockIdx.y+threadIdx.y;
@@ -87,9 +88,14 @@ __global__ void render_pixel (
     ray_dir.z = dir_rot.y;
 
     float3 color = make_float3(0.95);
-    const int bounces = 6;
+    const int max_bounces = 6;
     
-    ray_pos = intersect(ray_pos, ray_dir, time);
+    for (int bounce = 0; bounce < max_bounces; bounce++)
+    {
+        ray_pos = intersect(ray_pos, ray_dir, time);
+
+    }
+    
 
     float3 background = make_float3(0.87);
     float3 normal = calcNormal(ray_pos, time);
