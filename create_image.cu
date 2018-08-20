@@ -90,7 +90,7 @@ void render_images(int x_dim, int y_dim, int t_dim) {
             cudaFree(device_img);
 
             cudaEventRecord( stop, 0 );
-            //cudaThreadSynchronize();
+            cudaThreadSynchronize();
             cudaEventElapsedTime( &measured_time, start, stop );
     
             cudaEventDestroy( start );

@@ -50,7 +50,7 @@ __device__ float3 calcNormal( float3 pos, float t )
 __device__ float3 intersect(float3 ray_pos, float3 ray_dir, float t)
 {
     for (int i=0; i<1024; i++) {
-        float dist = map(ray_pos, time);
+        float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
         ray_pos += dist * ray_dir * 0.15;
     }
@@ -65,7 +65,7 @@ __global__ void render_pixel (
     int y_offset
 ){
     const int x = blockDim.x*blockIdx.x+threadIdx.x;
-    const int y = blockDim.y*blockIdx.y+threadIdx.y;
+    const int y = blockDim.y*blockIdx.y+threadIdx.y+y_offset;
     if (x >= x_dim || y >= y_dim) return;
 
     float time = float(time_step);
@@ -90,17 +90,17 @@ __global__ void render_pixel (
     float3 color = make_float3(0.95);
     const int max_bounces = 6;
     
-    for (int bounce = 0; bounce < max_bounces; bounce++)
-    {
+    //for (int bounce = 0; bounce < max_bounces; bounce++)
+    //{
         ray_pos = intersect(ray_pos, ray_dir, time);
 
-    }
+    //}
     
 
     float3 background = make_float3(0.87);
     float3 normal = calcNormal(ray_pos, time);
     float value = dot(normal,light_dir);
-    float3 color = make_float3(value, value, value);
+    color = make_float3(value, value, value);
     if (length(ray_pos) > 10.0) color = background;
     //color = make_float3(rng::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
 
@@ -134,7 +134,7 @@ __global__ void render_pixel (
     // gamma correction
     light_accum = pow(light_accum, 0.45);
     */
-    const int pixel = 3*(y*x_dim+x);
+    const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
     image[pixel+1] = (uint8_t)(fmin(255.0*color.y, 255.0));
     image[pixel+2] = (uint8_t)(fmin(255.0*color.z, 255.0));
