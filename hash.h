@@ -25,7 +25,7 @@ __device__ __forceinline__ unsigned hash4(unsigned a, unsigned b, unsigned c, un
 */
 
 // https://www.shadertoy.com/view/4dlcR4
-uint hash2(uint x, uint y)
+__device__ __forceinline__ uint hash2(uint x, uint y)
 {
   x *= 0x3504f335u;   // 15 | 101 | 41*79*274627
   y *= 0x8fc1ecd5u;   // 18 | 101 | 5*482370193
