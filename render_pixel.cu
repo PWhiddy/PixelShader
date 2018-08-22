@@ -137,7 +137,7 @@ __global__ void render_pixel (
     // gamma correction
     light_accum = pow(light_accum, 0.45);
     */
-    const float conv_range = 2.3283064365387e-10
+    const float conv_range = 2.3283064365387e-10;
     float val = hash2intfloat(x,y)*conv_range;
     color.x = val;
     color.y = val;

@@ -19,7 +19,7 @@ __device__ __forceinline__ unsigned hash3(unsigned a, unsigned b, unsigned c) {
     return hash(a) ^ hash(b) ^ hash(c);
 }
 
-__device__ __forceinline__ unsigned hash4(unsigned a, unsigned b, unsigned c unsigned d) {
+__device__ __forceinline__ unsigned hash4(unsigned a, unsigned b, unsigned c, unsigned d) {
     return hash2(a,b) ^ hash2(c,d);
 }
 
