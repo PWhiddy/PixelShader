@@ -1,8 +1,7 @@
 #include "cutil_math.h"
-#define usint (unsigned int)
 
 // From https://nullprogram.com/blog/2018/07/31/
-__device__ __forceinline__ usint hash(usint a)
+__device__ __forceinline__ unsigned hash(unsigned a) 
 {
     a ^= a >> 16;
     a *= 0x7feb352d;
@@ -12,19 +11,19 @@ __device__ __forceinline__ usint hash(usint a)
     return a;
 }
 
-__device__ __forceinline__ usint hash2(usint a, usint b) {
+__device__ __forceinline__ unsigned hash2(unsigned a, unsigned b) {
     return hash(a) ^ hash(b);
 }
 
-__device__ __forceinline__ usint hash3(usint a, usint b, usint c) {
+__device__ __forceinline__ unsigned hash3(unsigned a, unsigned b, unsigned c) {
     return hash(a) ^ hash(b) ^ hash(c);
 }
 
-__device__ __forceinline__ usint hash4(usint a, usint b, usint c usint d) {
+__device__ __forceinline__ unsigned hash4(unsigned a, unsigned b, unsigned c unsigned d) {
     return hash2(a,b) ^ hash2(c,d);
 }
 
-__device__ __forceinline__ float hash2intfloat(usint a, usint b) {
+__device__ __forceinline__ float hash2intfloat(unsigned a, unsigned b) {
     return __uint2float_rd( hash2(a,b) );
 }
 
