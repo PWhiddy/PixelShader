@@ -146,7 +146,7 @@ __global__ void render_pixel (
     color.z = val;
     */
 
-    uint3 rand = hash33( make_int3( x, y, 0 ) );
+    uint3 rand = hash33( make_uint3( x, y, 0 ) );
     color.x = __uint2float_rd(rand.x) * conv_range;
     coloy.y = __uint2float_rd(rand.y) * conv_range;
     color.z = __uint2float_rd(rand.z) * conv_range;

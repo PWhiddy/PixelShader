@@ -55,6 +55,7 @@ __device__ __forceinline__ uint3 hash33( uint3 x )
     x.y = ((x.y>>8U)^x.z)*1103515245U;
     x.z = ((x.z>>8U)^x.x)*1103515245U;
 
+    return x;
 }
 
 __device__ __forceinline__ float hash2intfloat(uint a, uint b) {
