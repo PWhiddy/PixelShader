@@ -43,17 +43,20 @@ __device__ __forceinline__ uint3 hash33( uint3 x )
     x = ((x>>8U)^x.yzx)*1103515245U;
     //return vec3(x)*(1.0/float(0xffffffffU));
     */
+    uint temp_x = x.x;
     x.x = ((x.x>>8U)^x.y)*1103515245U;
     x.y = ((x.y>>8U)^x.z)*1103515245U;
-    x.z = ((x.z>>8U)^x.x)*1103515245U;
+    x.z = ((x.z>>8U)^temp_x)*1103515245U;
 
+    temp_x = x.x;
     x.x = ((x.x>>8U)^x.y)*1103515245U;
     x.y = ((x.y>>8U)^x.z)*1103515245U;
-    x.z = ((x.z>>8U)^x.x)*1103515245U;
+    x.z = ((x.z>>8U)^temp_x)*1103515245U;
 
+    temp_x = x.x;
     x.x = ((x.x>>8U)^x.y)*1103515245U;
     x.y = ((x.y>>8U)^x.z)*1103515245U;
-    x.z = ((x.z>>8U)^x.x)*1103515245U;
+    x.z = ((x.z>>8U)^temp_x)*1103515245U;
 
     return x;
 }
