@@ -148,7 +148,7 @@ __global__ void render_pixel (
 
     uint3 rand = hash33( make_uint3( x, y, 0 ) );
     color.x = __uint2float_rd(rand.x) * conv_range;
-    coloy.y = __uint2float_rd(rand.y) * conv_range;
+    color.y = __uint2float_rd(rand.y) * conv_range;
     color.z = __uint2float_rd(rand.z) * conv_range;
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
