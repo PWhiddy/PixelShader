@@ -34,6 +34,29 @@ __device__ __forceinline__ uint hash2(uint x, uint y)
   return x;
 }
 
+// https://www.shadertoy.com/view/XlXcW4
+__device__ __forceinline__ uint3 hash33( uint3 x )
+{
+    /*
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    //return vec3(x)*(1.0/float(0xffffffffU));
+    */
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.x)*1103515245U;
+
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.x)*1103515245U;
+
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.x)*1103515245U;
+
+}
+
 __device__ __forceinline__ float hash2intfloat(uint a, uint b) {
     return __uint2float_rd( hash2(a,b) );
 }

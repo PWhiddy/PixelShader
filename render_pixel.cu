@@ -137,11 +137,19 @@ __global__ void render_pixel (
     // gamma correction
     light_accum = pow(light_accum, 0.45);
     */
+    
     const float conv_range = 2.3283064365387e-10;
+    /*
     float val = hash2intfloat(x,y)*conv_range;
     color.x = val;
     color.y = val;
     color.z = val;
+    */
+
+    int3 rand = hash33( make_int3( x, y, 0 ) );
+    color.x = __uint2float_rd(rand.x) * conv_range;
+    coloy.y = __uint2float_rd(rand.y) * conv_range;
+    color.z = __uint2float_rd(rand.z) * conv_range;
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
