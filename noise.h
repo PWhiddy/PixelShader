@@ -1,5 +1,33 @@
 #include "cutil_math.h"
+/*
+// From https://nullprogram.com/blog/2018/07/31/
+__device__ __forceinline__ unsigned int hash(unsigned int a)
+{
+    a ^= a >> 16;
+    a *= 0x7feb352d;
+    a ^= a >> 15;
+    a *= 0x846ca68b;
+    a ^= a >> 16;
+    return a;
+}
 
+__device__ __forceinline__ unsigned int hash2(unsigned int a, unsigned int b) {
+    return hash(a) ^ hash(b);
+}
+
+__device__ __forceinline__ unsigned int hash3(unsigned int a, unsigned int b, unsigned int c) {
+    return hash(a) ^ hash(b) ^ hash(c);
+}
+
+__device__ __forceinline__ unsigned int hash4(unsigned int a, unsigned int b, unsigned int c unsigned int d) {
+    return hash2(a,b) ^ hash2(c,d);
+}
+
+__device__ __forceinline__ unsigned int hash2intfloat(unsigned int a, unsigned int b) {
+    return __uint2float_rd( hash2(a, b) );
+}
+*/
+/*
 __device__ float hash31(float3 p3)
 {
 	p3  = fract(p3 * make_float3(.1031f,.11369f,.13787f));
@@ -36,3 +64,4 @@ __device__ float simplex_noise(float3 p)
     
     return dot(make_float4(31.316f), n);
 }
+*/

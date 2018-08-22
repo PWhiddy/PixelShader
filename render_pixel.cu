@@ -1,5 +1,6 @@
+#include "hash.h"
 //#include "noise.h"
-#include "cuda_noise.h"
+//#include "cuda_noise.h"
 #include "cutil_math.h"
 
 __device__ float2 rotate(float2 p, float a)
@@ -18,6 +19,7 @@ __device__ float sdBox( float3 p, float3 b )
       return fminf(fmaxf(d.x,fmaxf(d.y,d.z)),0.0f) + length(fmaxf(d,make_float3(0.0f)));
 }
 
+/*
 __device__ float fractalNoise(float3 p) {
     p += 300.0f;
     float result = 0.0f;
@@ -56,6 +58,7 @@ __device__ float3 intersect(float3 ray_pos, float3 ray_dir, float t)
     }
     return ray_pos;
 }
+*/
 
 __global__ void render_pixel ( 
     uint8_t *image, 
@@ -89,7 +92,7 @@ __global__ void render_pixel (
 
     float3 color = make_float3(0.95);
     const int max_bounces = 6;
-    
+    /*
     //for (int bounce = 0; bounce < max_bounces; bounce++)
     //{
         ray_pos = intersect(ray_pos, ray_dir, time);
@@ -134,6 +137,12 @@ __global__ void render_pixel (
     // gamma correction
     light_accum = pow(light_accum, 0.45);
     */
+    const float conv_range = 2.3283064365387e-10
+    float val = hash2intfloat(x,y)*conv_range;
+    color.x = val;
+    color.y = val;
+    color.z = val;
+
     const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
     image[pixel+1] = (uint8_t)(fmin(255.0*color.y, 255.0));
