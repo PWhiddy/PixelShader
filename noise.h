@@ -41,7 +41,7 @@ __device__ __forceinline__ float noise4( float4 p ) {
     float sum = 0.0;
 
     #pragma unroll
-    for (int x=0; y<=1; x++)
+    for (int x=0; x<=1; x++)
     {
         #pragma unroll
         for (int y=0; y<=1; y++)
