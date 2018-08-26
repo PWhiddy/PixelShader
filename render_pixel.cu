@@ -1,6 +1,5 @@
 #include "noise.h"
 //#include "cuda_noise.h"
-//#include "cutil_math.h"
 
 /*
 __device__ float2 rotate(float2 p, float a)
@@ -36,7 +35,7 @@ __device__ float fractalNoise(float3 p) {
 */
 __device__ float map(float3 p, float t) {
     float d;
-    d =  sdSphere(p, 0.8)+0.0f*fractal4(make_float4(p.x,p.y,p.x,6.0f));
+    d =  sdSphere(p, 0.8)+0.02f*fractal4(make_float4(p.x,p.y,p.x,6.0f));
     //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
