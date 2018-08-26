@@ -88,6 +88,12 @@ __device__ __forceinline__ uint4 hash44( uint4 x )
     x.z = ((x.z>>8U)^x.w)*1103515245U;
     x.w = ((x.w>>8U)^temp_x)*1103515245U;
 
+    temp_x = x.x;
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.w)*1103515245U;
+    x.w = ((x.w>>8U)^temp_x)*1103515245U;
+
     return x;
 }
 
