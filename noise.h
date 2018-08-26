@@ -30,7 +30,7 @@ __device__ __forceinline__ float noise4( float4 p ) {
                            abs(float(1-y)-disp.y) *
                            abs(float(1-z)-disp.z) *
                            abs(float(1-w)-disp.w) * 
-                           randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ).x;
+                           dot(randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ), disp);
                 }
             }
         }
