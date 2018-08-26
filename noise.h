@@ -52,6 +52,7 @@ __device__ __forceinline__ float fractal4( float4 p ) {
     total += noise4(8.0f *p)*0.0625f;
     total += noise4(16.0f*p)*0.03125f;
     total += noise4(32.0f*p)*0.015625f;
+    total += noise4(64.0f*p)*0.0078125f;
     //float2 np = rotate(make_float2(p.x,p.w))
     return total;
 }
