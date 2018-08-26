@@ -147,15 +147,15 @@ __global__ void render_pixel (
     */
 
     
-    uint4 rand = randomInt44( make_uint4( x, y, 5, time_step ) );
-    color.x = __uint2float_rd(rand.x) * conv_range;
+    float4 rand = randomInt44( make_uint4( x, y, 5, time_step ) );
+    //color.x = __uint2float_rd(rand.x) * conv_range;
     //color.y = __uint2float_rd(rand.y) * conv_range;
     //color.z = __uint2float_rd(rand.z) * conv_range;
     
     //float val = noise4( make_float4( float(x)*0.2f, float(y)*0.2f, 5.0f, float(time_step) ) );
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
-    image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
-    image[pixel+1] = (uint8_t)(fmin(255.0*color.x, 255.0));
-    image[pixel+2] = (uint8_t)(fmin(255.0*color.x, 255.0));
+    image[pixel+0] = (uint8_t)(fmin(255.0*rand.x, 255.0));
+    image[pixel+1] = (uint8_t)(fmin(255.0*rand.x, 255.0));
+    image[pixel+2] = (uint8_t)(fmin(255.0*rand.x, 255.0));
 }
