@@ -1,4 +1,87 @@
-#include "cutil_math.h"
+#include "hash.h"
+
+__device__ __forceinline__ float noise4( float4 p ) {
+   
+    /*
+    //
+    // bilinear interpolation
+    float3 l = floor(p);
+    int3 rp = make_int3(l);
+    float3 dif = p-l;
+    T sum = zero<T>();
+
+    #pragma unroll
+    for (int a=0; a<=1; a++) 
+    {
+        #pragma unroll
+        for (int b=0; b<=1; b++)
+        {
+            #pragma unroll
+            for (int c=0; c<=1; c++)
+            {
+                sum += abs(float(1-a)-dif.x) *
+                       abs(float(1-b)-dif.y) *
+                       abs(float(1-c)-dif.z) *
+                    get_cell( make_int3( rp.x+a, rp.y+b, rp.z+c ), d, vol);
+            }
+        }
+    }
+    //
+    */
+
+    float4 lower = floor(p);
+    float4 disp = p-lower; 
+    uint4 low = make_uint4(lower);
+
+    float sum = 0.0;
+
+    #pragma unroll
+    for (int x=0; y<=1; x++)
+    {
+        #pragma unroll
+        for (int y=0; y<=1; y++)
+        {
+            #pragma unroll
+            for (int z=0; z<=1; z++)
+            {
+                #pragma unroll
+                for (int w=0; w<=1; w++)
+                {
+                    sum += abs(float(1-x)-disp.x) *
+                           abs(float(1-y)-disp.y) *
+                           abs(float(1-z)-disp.z) *
+                           abs(float(1-w)-disp.w) * 
+                           randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ).x;
+                }
+            }
+        }
+    }
+
+    return sum;
+
+    /*
+    float corners[16];
+    corners[0]  = random44( lower + make_float4(0.0,0.0,0.0,0.0) ).x;
+    corners[1]  = random44( lower + make_float4(1.0,0.0,0.0,0.0) ).x;
+    corners[2]  = random44( lower + make_float4(0.0,1.0,0.0,0.0) ).x;
+    corners[3]  = random44( lower + make_float4(0.0,0.0,1.0,0.0) ).x;
+    corners[4]  = random44( lower + make_float4(0.0,0.0,0.0,1.0) ).x;
+    corners[5]  = random44( lower + make_float4(1.0,1.0,0.0,0.0) ).x;
+    corners[6]  = random44( lower + make_float4(0.0,1.0,1.0,0.0) ).x;
+    corners[7]  = random44( lower + make_float4(0.0,0.0,1.0,1.0) ).x;
+    corners[8]  = random44( lower + make_float4(1.0,1.0,1.0,0.0) ).x;
+    corners[9]  = random44( lower + make_float4(0.0,1.0,1.0,1.0) ).x;
+    corners[10] = random44( lower + make_float4(1.0,1.0,1.0,1.0) ).x;
+    corners[11] = random44( lower + make_float4(1.0,0.0,1.0,0.0) ).x;
+    corners[12] = random44( lower + make_float4(0.0,1.0,0.0,1.0) ).x;
+    corners[13] = random44( lower + make_float4(1.0,1.0,0.0,1.0) ).x;
+    corners[14] = random44( lower + make_float4(1.0,0.0,1.0,1.0) ).x;
+    corners[15] = random44( lower + make_float4(1.0,0.0,0.0,1.0) ).x;
+    */
+
+    
+}
+
 /*
 // From https://nullprogram.com/blog/2018/07/31/
 __device__ __forceinline__ unsigned int hash(unsigned int a)

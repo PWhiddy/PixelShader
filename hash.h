@@ -61,6 +61,63 @@ __device__ __forceinline__ uint3 hash33( uint3 x )
     return x;
 }
 
+__device__ __forceinline__ uint4 hash44( uint4 x )
+{
+    /*
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    x = ((x>>8U)^x.yzx)*1103515245U;
+    //return vec3(x)*(1.0/float(0xffffffffU));
+    */
+    uint temp_x;
+    temp_x = x.x;
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.w)*1103515245U;
+    x.w = ((x.w>>8U)^temp_x)*1103515245U;
+
+    temp_x = x.x;
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.w)*1103515245U;
+    x.w = ((x.w>>8U)^temp_x)*1103515245U;
+
+    temp_x = x.x;
+    x.x = ((x.x>>8U)^x.y)*1103515245U;
+    x.y = ((x.y>>8U)^x.z)*1103515245U;
+    x.z = ((x.z>>8U)^x.w)*1103515245U;
+    x.w = ((x.w>>8U)^temp_x)*1103515245U;
+
+    return x;
+}
+
+__device__ __forceinline__ float4 random44(float4 p) {
+    uint4 h = hash44( make_uint4( 
+        __float2uint_rd(p.x*2048.0),
+        __float2uint_rd(p.y*2048.0),
+        __float2uint_rd(p.z*2048.0), 
+        __float2uint_rd(p.w*2048.0)
+    ));
+    const float conv_range = 2.3283064365387e-10;
+    return make_float4( 
+        __uint2float_rd(h.x)*conv_range,
+        __uint2float_rd(h.y)*conv_range,
+        __uint2float_rd(h.z)*conv_range,
+        __uint2float_rd(h.w)*conv_range
+     );
+}
+
+__device__ __forceinline__ float4 randomInt44(uint4 p) {
+    uint4 h = hash44( p );
+    const float conv_range = 2.3283064365387e-10;
+    return make_float4( 
+        __uint2float_rd(h.x)*conv_range,
+        __uint2float_rd(h.y)*conv_range,
+        __uint2float_rd(h.z)*conv_range,
+        __uint2float_rd(h.w)*conv_range
+     );
+}
+
 __device__ __forceinline__ float hash2intfloat(uint a, uint b) {
     return __uint2float_rd( hash2(a,b) );
 }
