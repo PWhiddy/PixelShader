@@ -1,7 +1,6 @@
 #include "noise.h"
-//#include "noise.h"
 //#include "cuda_noise.h"
-#include "cutil_math.h"
+//#include "cutil_math.h"
 
 /*
 __device__ float2 rotate(float2 p, float a)
@@ -37,7 +36,7 @@ __device__ float fractalNoise(float3 p) {
 */
 __device__ float map(float3 p, float t) {
     float d;
-    d =  sdSphere(p, 0.8)+0.0f*fractal4(make_float4(p.x,p.y,p.x,6.0f));
+    d =  sdSphere(p, 0.8);//+0.0f*fractal4(make_float4(p.x,p.y,p.x,6.0f));
     //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
@@ -154,10 +153,10 @@ __global__ void render_pixel (
     //color.y = __uint2float_rd(rand.y) * conv_range;
     //color.z = __uint2float_rd(rand.z) * conv_range;
     
-    //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
+    float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
-    image[pixel+0] = (uint8_t)(fmin(255.0*color.x, 255.0));
+    image[pixel+0] = (uint8_t)(fmin(255.0*val, 255.0));
     image[pixel+1] = (uint8_t)(fmin(255.0*color.y, 255.0));
     image[pixel+2] = (uint8_t)(fmin(255.0*color.z, 255.0));
 }
