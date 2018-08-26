@@ -1,5 +1,11 @@
 #include "hash.h"
 
+__device__ float2 rotate(float2 p, float a)
+{
+    return make_float2(p.x*cos(a) - p.y*sin(a),
+                       p.y*cos(a) + p.x*sin(a));
+}
+
 __device__ __forceinline__ float noise4( float4 p ) {
 
     float4 lower = floor(p);
@@ -30,13 +36,26 @@ __device__ __forceinline__ float noise4( float4 p ) {
                            abs(float(1-y)-disp.y) *
                            abs(float(1-z)-disp.z) *
                            abs(float(1-w)-disp.w) * 
-                           dot(1.0f-2.0f*randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ), portion);
+                           randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w )).x;
                 }
             }
         }
     }
     return sum;
 }
+
+__device__ __forceinline__ float fractal4( float4 p ) {
+    float total = 0.0;
+    total += noise4(1.0f *p)*0.5f;
+    total += noise4(2.0f *p)*0.25f;
+    total += noise4(4.0f *p)*0.125f;
+    total += noise4(8.0f *p)*0.0625f;
+    total += noise4(16.0f*p)*0.03125f;
+    total += noise4(32.0f*p)*0.015625f;
+    //float2 np = rotate(make_float2(p.x,p.w))
+    return total;
+}
+
 
 /*
 // From https://nullprogram.com/blog/2018/07/31/
