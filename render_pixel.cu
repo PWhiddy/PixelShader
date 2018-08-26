@@ -1,4 +1,4 @@
-#include "hash.h"
+#include "noise.h"
 //#include "noise.h"
 //#include "cuda_noise.h"
 #include "cutil_math.h"
