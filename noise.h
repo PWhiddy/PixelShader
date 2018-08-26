@@ -3,8 +3,8 @@
 __device__ __forceinline__ float noise4( float4 p ) {
 
     float4 lower = floor(p);
-    float4 disp = p-lower;
-    disp = disp*disp*(3.0-2.0*disp);
+    float4 portion = p-lower;
+    float4 disp = portion*portion*(3.0-2.0*portion);
     uint4 low = make_uint4(
         __float2uint_rd(lower.x),
         __float2uint_rd(lower.y),
@@ -30,7 +30,7 @@ __device__ __forceinline__ float noise4( float4 p ) {
                            abs(float(1-y)-disp.y) *
                            abs(float(1-z)-disp.z) *
                            abs(float(1-w)-disp.w) * 
-                           dot(1.0f-2.0f*randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ), disp);
+                           dot(1.0f-2.0f*randomInt44( make_uint4( low.x+x, low.y+y, low.z+z, low.w+w ) ), portion);
                 }
             }
         }
