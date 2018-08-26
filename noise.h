@@ -8,7 +8,6 @@ __device__ float2 rotate(float2 p, float a)
 
 __device__ __forceinline__ float noise4( float4 p ) {
 
-    p += 500.0f;
     float4 lower = floor(p);
     float4 portion = p-lower;
     float4 disp = portion*portion*(3.0-2.0*portion);
