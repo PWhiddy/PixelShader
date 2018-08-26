@@ -31,7 +31,12 @@ __device__ __forceinline__ float noise4( float4 p ) {
 
     float4 lower = floor(p);
     float4 disp = p-lower; 
-    uint4 low = make_uint4(lower);
+    uint4 low = make_uint4(
+        __float2uint_rd(lower.x),
+        __float2uint_rd(lower.y),
+        __float2uint_rd(lower.z),
+        __float2uint_rd(lower.w)
+    );
 
     float sum = 0.0;
 
