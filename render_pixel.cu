@@ -35,7 +35,7 @@ __device__ float fractalNoise(float3 p) {
 */
 __device__ float map(float3 p, float t) {
     float d;
-    d =  sdSphere(p, 0.8)+0.06f*fractal4(make_float4(4.0f*p.x+50.0f,4.0f*p.y+50.0f,4.0f*p.x+50.0f,6.0f));
+    d =  sdSphere(p, 0.8)+0.025f*fractal4(make_float4(4.0f*p.x+50.0f,4.0f*p.y+50.0f,4.0f*p.x+50.0f,0.008f*t));
     //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
