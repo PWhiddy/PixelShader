@@ -193,7 +193,7 @@ __global__ void render_pixel (
     //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
     float val = 0.5;
     glm::vec3 position = glm::vec3(float(x)*0.01f, float(y)*0.01f, 1.0f);
-    val = simplex_noise(position);
+    val = simplex_noise(position) + 0.5f;
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0f*val, 255.0f));
