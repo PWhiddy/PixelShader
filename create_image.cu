@@ -63,7 +63,7 @@ void render_images(int x_dim, int y_dim, int t_dim) {
             cudaEventRecord( start, 0 );
 
             int y_offset = dev_id*(y_dim/num_devices);
-            dim3 block_size(16,16,1);
+            dim3 block_size(32,32,1);
             dim3 image_grid(
                 (x_dim+block_size.x-1)/block_size.x, 
                 ((y_dim+block_size.y-1)/block_size.y)/num_devices, 1);
