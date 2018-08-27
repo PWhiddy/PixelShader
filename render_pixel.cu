@@ -68,14 +68,14 @@ __device__ float3 intersect(float3 ray_pos, float3 ray_dir, float t)
 }
 */
 
-glm::vec3 hash33(glm::vec3 p3)
+__device__ __forceinline__ glm::vec3 hash33(glm::vec3 p3)
 {
 	p3 = glm::fract(p3 * glm::vec3(.1031f,.11369f,.13787f));
     p3 += glm::dot(p3, glm::vec3(p3.y, p3.x, p3.z)+19.19f);
     return -1.0f + 2.0f * glm::fract(glm::vec3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
 }
 
-float simplex_noise(glm::vec3 p)
+__device__ __forceinline__ float simplex_noise(glm::vec3 p)
 {
     const float K1 = 0.333333333f;
     const float K2 = 0.166666667f;
