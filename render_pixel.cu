@@ -107,7 +107,7 @@ __device__ __forceinline__ float fractal_noise(glm::vec3 p) {
     sum += 0.0625f*simplex_noise(16.0f*p);
     sum += 0.03125f*simplex_noise(32.0f*p);
     sum += 0.015625f*simplex_noise(64.0f*p);
-    sum += 0.0078125*simplex_noise(128.0*p);
+    sum += 0.0078125*simplex_noise(128.0f*p);
     sum += 0.00390625f*simplex_noise(256.0f*p);
     sum += 0.001953125f*simplex_noise(512.0f*p);
     return sum * 0.5f + 0.5f;
@@ -199,7 +199,6 @@ __global__ void render_pixel (
     color.z = val;
     */
 
-    
     //float4 rand = randomInt44( make_uint4( x, y, 5, time_step ) );
     //color.x = __uint2float_rd(rand.x) * conv_range;
     //color.y = __uint2float_rd(rand.y) * conv_range;
