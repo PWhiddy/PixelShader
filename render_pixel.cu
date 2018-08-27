@@ -3,7 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/common.hpp>
-#include <glm/geometry.hpp>
+#include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
 //#include "noise.h"
 //#include "cuda_noise.h"
