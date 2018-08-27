@@ -10,7 +10,7 @@ __device__ float2 rotate(float2 p, float a)
                        p.y*cos(a) + p.x*sin(a));
 }
 */
-
+/*
 __device__ float sdSphere(float3 p, float r) {
     return length(p)-r;
 }
@@ -20,7 +20,7 @@ __device__ float sdBox( float3 p, float3 b )
       float3 d = fabs(p) - b;
       return fminf(fmaxf(d.x,fmaxf(d.y,d.z)),0.0f) + length(fmaxf(d,make_float3(0.0f)));
 }
-
+*/
 /*
 __device__ float fractalNoise(float3 p) {
     p += 300.0f;
@@ -35,6 +35,7 @@ __device__ float fractalNoise(float3 p) {
     return result;
 }
 */
+/*
 __device__ float map(float3 p, float t) {
     float d;
     d =  sdSphere(p, 0.8)+0.025f*fractal4(make_float4(4.0f*p.x+50.0f,4.0f*p.y+50.0f,4.0f*p.x+50.0f,0.008f*t));
@@ -60,7 +61,7 @@ __device__ float3 intersect(float3 ray_pos, float3 ray_dir, float t)
     }
     return ray_pos;
 }
-
+*/
 
 __global__ void render_pixel ( 
     uint8_t *image, 
@@ -94,14 +95,14 @@ __global__ void render_pixel (
 
     float3 color = make_float3(0.95);
     const int max_bounces = 6;
-    
+    /*
     //for (int bounce = 0; bounce < max_bounces; bounce++)
     //{
         ray_pos = intersect(ray_pos, ray_dir, time);
 
     //}
     
-
+    
     float3 background = make_float3(0.87);
     float3 normal = calcNormal(ray_pos, time);
     float value = dot(normal,light_dir);
@@ -154,7 +155,8 @@ __global__ void render_pixel (
     //color.y = __uint2float_rd(rand.y) * conv_range;
     //color.z = __uint2float_rd(rand.z) * conv_range;
     
-    float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
+    //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
+    float val = 0.5;
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0*val, 255.0));
