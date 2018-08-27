@@ -9,6 +9,53 @@
 //#include "cuda_noise.h"
 
 
+
+__device__ __forceinline__ glm::vec3 hash33(glm::vec3 p3)
+{
+	p3 = glm::fract(p3 * glm::vec3(.1031f,.11369f,.13787f));
+    p3 += glm::dot(p3, glm::vec3(p3.y, p3.x, p3.z)+19.19f);
+    return -1.0f + 2.0f * glm::fract(glm::vec3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
+}
+
+__device__ __forceinline__ float simplex_noise(glm::vec3 p)
+{
+    const float K1 = 0.333333333f;
+    const float K2 = 0.166666667f;
+    
+    glm::vec3 i = glm::floor(p + (p.x + p.y + p.z) * K1);
+    glm::vec3 d0 = p - (i - (i.x + i.y + i.z) * K2);
+    
+    // thx nikita: https://www.shadertoy.com/view/XsX3zB
+    glm::vec3 e = glm::step(glm::vec3(0.0), d0 - glm::vec3(d0.y, d0.z, d0.x));
+	glm::vec3 i1 = e * (1.0f - glm::vec3(e.z, e.x, e.y));
+	glm::vec3 i2 = 1.0f - glm::vec3(e.z,e.x,e.y) * (1.0f - e);
+    
+    glm::vec3 d1 = d0 - (i1 - 1.0f * K2);
+    glm::vec3 d2 = d0 - (i2 - 2.0f * K2);
+    glm::vec3 d3 = d0 - (1.0f - 3.0f * K2);
+    
+    glm::vec4 h = glm::max(0.6f - glm::vec4(glm::dot(d0, d0), glm::dot(d1, d1), glm::dot(d2, d2), glm::dot(d3, d3)), 0.0f);
+    glm::vec4 n = h * h * h * h * glm::vec4(glm::dot(d0, hash33(i)), glm::dot(d1, hash33(i + i1)), glm::dot(d2, hash33(i + i2)), glm::dot(d3, hash33(i + 1.0f)));
+    
+    return glm::dot(glm::vec4(31.316f), n);
+}
+
+__device__ __forceinline__ float fractal_noise(glm::vec3 p) {
+    float sum = 0.0f;
+    sum += simplex_noise(p);
+    sum += 0.5f*simplex_noise(2.0f*p);
+    sum += 0.25f*simplex_noise(4.0f*p);
+    sum += 0.125f*simplex_noise(8.0f*p);
+    sum += 0.0625f*simplex_noise(16.0f*p);
+    sum += 0.03125f*simplex_noise(32.0f*p);
+    sum += 0.015625f*simplex_noise(64.0f*p);
+    sum += 0.0078125*simplex_noise(128.0f*p);
+    sum += 0.00390625f*simplex_noise(256.0f*p);
+    sum += 0.001953125f*simplex_noise(512.0f*p);
+    return sum * 0.5f + 0.5f;
+}
+
+
 __device__ glm::vec2 rotate(glm::vec2 p, float a)
 {
     return glm::vec2(p.x*cos(a) - p.y*sin(a),
@@ -64,51 +111,6 @@ __device__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
         ray_pos += dist * ray_dir * 0.15f;
     }
     return ray_pos;
-}
-
-__device__ __forceinline__ glm::vec3 hash33(glm::vec3 p3)
-{
-	p3 = glm::fract(p3 * glm::vec3(.1031f,.11369f,.13787f));
-    p3 += glm::dot(p3, glm::vec3(p3.y, p3.x, p3.z)+19.19f);
-    return -1.0f + 2.0f * glm::fract(glm::vec3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
-}
-
-__device__ __forceinline__ float simplex_noise(glm::vec3 p)
-{
-    const float K1 = 0.333333333f;
-    const float K2 = 0.166666667f;
-    
-    glm::vec3 i = glm::floor(p + (p.x + p.y + p.z) * K1);
-    glm::vec3 d0 = p - (i - (i.x + i.y + i.z) * K2);
-    
-    // thx nikita: https://www.shadertoy.com/view/XsX3zB
-    glm::vec3 e = glm::step(glm::vec3(0.0), d0 - glm::vec3(d0.y, d0.z, d0.x));
-	glm::vec3 i1 = e * (1.0f - glm::vec3(e.z, e.x, e.y));
-	glm::vec3 i2 = 1.0f - glm::vec3(e.z,e.x,e.y) * (1.0f - e);
-    
-    glm::vec3 d1 = d0 - (i1 - 1.0f * K2);
-    glm::vec3 d2 = d0 - (i2 - 2.0f * K2);
-    glm::vec3 d3 = d0 - (1.0f - 3.0f * K2);
-    
-    glm::vec4 h = glm::max(0.6f - glm::vec4(glm::dot(d0, d0), glm::dot(d1, d1), glm::dot(d2, d2), glm::dot(d3, d3)), 0.0f);
-    glm::vec4 n = h * h * h * h * glm::vec4(glm::dot(d0, hash33(i)), glm::dot(d1, hash33(i + i1)), glm::dot(d2, hash33(i + i2)), glm::dot(d3, hash33(i + 1.0f)));
-    
-    return glm::dot(glm::vec4(31.316f), n);
-}
-
-__device__ __forceinline__ float fractal_noise(glm::vec3 p) {
-    float sum = 0.0f;
-    sum += simplex_noise(p);
-    sum += 0.5f*simplex_noise(2.0f*p);
-    sum += 0.25f*simplex_noise(4.0f*p);
-    sum += 0.125f*simplex_noise(8.0f*p);
-    sum += 0.0625f*simplex_noise(16.0f*p);
-    sum += 0.03125f*simplex_noise(32.0f*p);
-    sum += 0.015625f*simplex_noise(64.0f*p);
-    sum += 0.0078125*simplex_noise(128.0f*p);
-    sum += 0.00390625f*simplex_noise(256.0f*p);
-    sum += 0.001953125f*simplex_noise(512.0f*p);
-    return sum * 0.5f + 0.5f;
 }
 
 __global__ void render_pixel ( 
