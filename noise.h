@@ -1,5 +1,6 @@
 #include "hash.h"
 
+/*
 __device__ float2 rotate(float2 p, float a)
 {
     return make_float2(p.x*cos(a) - p.y*sin(a),
@@ -57,6 +58,7 @@ __device__ __forceinline__ float fractal4( float4 p ) {
     return total;
 }
 
+*/
 
 /*
 // From https://nullprogram.com/blog/2018/07/31/
