@@ -21,7 +21,7 @@ __device__ float sdSphere(glm::vec3 p, float r) {
 
 __device__ float sdBox( glm::vec3 p, glm::vec3 b )
 {
-    glm::vec3 d = glm::vec3abs(p) - b;
+    glm::vec3 d = glm::abs(p) - b;
       return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
 }
 
@@ -56,12 +56,12 @@ __device__ glm::vec3 calcNormal( glm::vec3 pos, float t )
 					  glm::vec3(e.x,e.x,e.x)*map( pos + glm::vec3(e.x,e.x,e.x), t ) );
 }
 
-__device__ float3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
+__device__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
 {
     for (int i=0; i<1024; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.15;
+        ray_pos += dist * ray_dir * 0.15f;
     }
     return ray_pos;
 }
@@ -129,14 +129,14 @@ __global__ void render_pixel (
     float uvy = -float(y)/float(y_dim)+0.5;
     uvx *= float(x_dim)/float(y_dim);     
 
-    //float3 light_dir = normalize(make_float3(0.1, 1.0, -0.5));
+    glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
 
     // Set up ray originating from camera
     glm::vec3 ray_pos = glm::vec3(0.0, 0.0, -1.5);
     glm::vec2 pos_rot = rotate(glm::vec2(ray_pos.x, ray_pos.z), 0.0);
     ray_pos.x = pos_rot.x;
     ray_pos.z = pos_rot.y;
-    glm::vec3 ray_dir = glm::normalize(make_float3(uvx,uvy,0.5));
+    glm::vec3 ray_dir = glm::normalize(glm::vec3(uvx,uvy,0.5));
     glm::vec2 dir_rot = rotate(glm::vec2(ray_dir.x, ray_dir.z), 0.0);
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
