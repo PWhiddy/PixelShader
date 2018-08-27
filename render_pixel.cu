@@ -98,10 +98,25 @@ __device__ __forceinline__ float simplex_noise(glm::vec3 p)
     return glm::dot(glm::vec4(31.316f), n);
 }
 
+__device__ __forceinline__ float fractal_noise(glm::vec3 p) {
+    float sum = 0.0f;
+    sum += simplex_noise(p);
+    sum += 0.5f*simplex_noise(2.0f*p);
+    sum += 0.25f*simplex_noise(4.0f*p);
+    sum += 0.125f*simplex_noise(8.0f*p);
+    sum += 0.0625f*simplex_noise(16.0f*p);
+    sum += 0.03125f*simplex_noise(32.0f*p);
+    sum += 0.015625f*simplex_noise(64.0f*p);
+    sum += 0.0078125*simplex_noise(128.0*p);
+    sum += 0.00390625f*simplex_noise(256.0f*p);
+    sum += 0.001953125f*simplex_noise(512.0f*p);
+    return sum * 0.5f + 0.5f;
+}
+
 __global__ void render_pixel ( 
-    uint8_t *image, 
-    int x_dim, 
-    int y_dim, 
+    uint8_t *image,
+    int x_dim,
+    int y_dim,
     int time_step,
     int y_offset
 ){
@@ -193,7 +208,8 @@ __global__ void render_pixel (
     //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
     float val = 0.5;
     glm::vec3 position = glm::vec3(float(x)*0.01f, float(y)*0.01f, 1.0f);
-    val = 0.5f*simplex_noise(position) + 0.5f;
+    val = fractal_noise(position);
+    //val = 0.5f*simplex_noise(position) + 0.5f;
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
     image[pixel+0] = (uint8_t)(fmin(255.0f*val, 255.0f));
