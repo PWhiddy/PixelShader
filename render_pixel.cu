@@ -85,11 +85,11 @@ __global__ void render_pixel (
 
     // Set up ray originating from camera
     float3 ray_pos = make_float3(0.0, 0.0, -1.5);
-    float2 pos_rot = rotate(make_float2(ray_pos.x, ray_pos.z), 0.0);
-    ray_pos.x = pos_rot.x;
-    ray_pos.z = pos_rot.y;
-    float3 ray_dir = normalize(make_float3(uvx,uvy,0.5));
-    float2 dir_rot = rotate(make_float2(ray_dir.x, ray_dir.z), 0.0);
+    //float2 pos_rot = rotate(make_float2(ray_pos.x, ray_pos.z), 0.0);
+    //ray_pos.x = pos_rot.x;
+    //ray_pos.z = pos_rot.y;
+    float3 ray_dir = glm::normalize(make_float3(uvx,uvy,0.5));
+    //float2 dir_rot = rotate(make_float2(ray_dir.x, ray_dir.z), 0.0);
     ray_dir.x = dir_rot.x;
     ray_dir.z = dir_rot.y;
 
