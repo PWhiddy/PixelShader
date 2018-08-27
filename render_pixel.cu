@@ -91,7 +91,7 @@ __device__ float fractalNoise(float3 p) {
 
 __device__ float map(glm::vec3 p, float t) {
     float d;
-    d =  sdSphere(p, 0.8)+0.73f*fractal_noise(glm::vec3(0.12f*p.x,0.12f*p.y,0.008f*t)+50.0f);
+    d =  sdSphere(p, 0.8)+(sin(t*0.1))*0.73f*fractal_noise(glm::vec3(0.12f*p.x,0.12f*p.y,0.008f*t)+50.0f+t*0.01*t);
     //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
     return d;
 }
