@@ -186,7 +186,7 @@ __global__ void render_pixel (
     glm::vec3 normal = calcNormal(ray_pos, time);
     float value = glm::dot(normal,light_dir);
     color = glm::vec3(value, value, value);
-    if (boxDist(ray_pos) < 0.05) {
+    if (boxDist(ray_pos, time) < 0.05) {
         color.y -= 0.4;
         color.z -= 0.5;
     }
