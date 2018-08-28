@@ -77,9 +77,9 @@ __device__ __forceinline__ float fractal_noise(glm::vec3 p) {
     sum += simplex_noise(p);
     sum += 0.5f*simplex_noise(2.0f*p);
     sum += 0.25f*simplex_noise(4.0f*p);
-    sum += 0.425f*simplex_noise(8.0f*p);
+    sum += 0.125f*simplex_noise(8.0f*p);
     sum += 0.0625f*simplex_noise(16.0f*p);
-    sum += 0.03125f*simplex_noise(32.0f*p);
+    sum += 0.23125f*simplex_noise(32.0f*p);
     sum += 0.015625f*simplex_noise(64.0f*p);
     sum += 0.0078125*simplex_noise(128.0f*p);
     sum += 0.00390625f*simplex_noise(256.0f*p);
@@ -107,7 +107,7 @@ __device__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noise(p+30.0f);
+    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noise(0.15f*p+30.0f);
 }
 
 __device__ float map(glm::vec3 p, float t) {
