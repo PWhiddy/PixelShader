@@ -92,12 +92,12 @@ __device__ __forceinline__ float fractal_noise(glm::vec3 p) {
 __device__ __forceinline__ float fractal_noiseRough(glm::vec3 p) {
     float sum = 0.0f;
     sum += simplex_noise(p);
-    sum += 0.7f*simplex_noise(2.0f*p);
-    sum += 0.45f*simplex_noise(4.0f*p);
-    sum += 0.285f*simplex_noise(8.0f*p);
-    sum += 0.1225f*simplex_noise(16.0f*p);
+    sum += 2.7f*simplex_noise(2.0f*p);
+    sum += 1.45f*simplex_noise(4.0f*p);
+    sum += 0.685f*simplex_noise(8.0f*p);
+    sum += 0.4225f*simplex_noise(16.0f*p);
     sum += 0.23125f*simplex_noise(32.0f*p);
-    sum += 0.085625f*simplex_noise(64.0f*p);
+    sum += 0.125625f*simplex_noise(64.0f*p);
     sum += 0.0278125*simplex_noise(128.0f*p);
     sum += 0.00690625f*simplex_noise(256.0f*p);
     sum += 0.003953125f*simplex_noise(512.0f*p);
