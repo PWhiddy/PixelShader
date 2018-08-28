@@ -106,6 +106,10 @@ __device__ float sdBox( glm::vec3 p, glm::vec3 b )
       return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
 }
 
+__device__ float boxDist(glm::vec3 p, float t) {
+    return -sdBox(p, make_float3(2.5,2.5,2.5));
+}
+
 __device__ float map(glm::vec3 p, float t) {
     float d;
     d =  sdSphere(p, 0.8) + 
@@ -115,7 +119,7 @@ __device__ float map(glm::vec3 p, float t) {
               50.0f + 
               glm::vec3(0.0f,0.0f,0.0001f*t)
             );
-    //d = fminf(-sdBox(p, make_float3(2.0,2.0,2.0)), d);
+    d = fminf(boxDist(p, t), d);
     return d;
 }
 
@@ -133,7 +137,7 @@ __device__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
     for (int i=0; i<1024; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.15f;
+        ray_pos += dist * ray_dir * 0.25f;
     }
     return ray_pos;
 }
@@ -182,7 +186,11 @@ __global__ void render_pixel (
     glm::vec3 normal = calcNormal(ray_pos, time);
     float value = glm::dot(normal,light_dir);
     color = glm::vec3(value, value, value);
-    if (glm::length(ray_pos) > 10.0) color = background;
+    if (boxDist(ray_pos) < 0.05) {
+        color.y -= 0.4;
+        color.z -= 0.5;
+    }
+    if (glm::length(ray_pos) > 50.0) color = background;
     //color = make_float3(rng::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
 
     /*
