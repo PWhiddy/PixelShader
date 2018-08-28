@@ -79,7 +79,7 @@ __device__ __forceinline__ float fractal_noise(glm::vec3 p) {
     sum += 0.25f*simplex_noise(4.0f*p);
     sum += 0.125f*simplex_noise(8.0f*p);
     sum += 0.0625f*simplex_noise(16.0f*p);
-    sum += 0.23125f*simplex_noise(32.0f*p);
+    sum += 0.023125f*simplex_noise(32.0f*p);
     sum += 0.015625f*simplex_noise(64.0f*p);
     sum += 0.0078125*simplex_noise(128.0f*p);
     sum += 0.00390625f*simplex_noise(256.0f*p);
@@ -89,6 +89,22 @@ __device__ __forceinline__ float fractal_noise(glm::vec3 p) {
     return sum * 0.5f + 0.5f;
 }
 
+__device__ __forceinline__ float fractal_noiseRough(glm::vec3 p) {
+    float sum = 0.0f;
+    sum += simplex_noise(p);
+    sum += 0.5f*simplex_noise(2.0f*p);
+    sum += 0.25f*simplex_noise(4.0f*p);
+    sum += 0.185f*simplex_noise(8.0f*p);
+    sum += 0.1225f*simplex_noise(16.0f*p);
+    sum += 0.23125f*simplex_noise(32.0f*p);
+    sum += 0.085625f*simplex_noise(64.0f*p);
+    sum += 0.0278125*simplex_noise(128.0f*p);
+    sum += 0.00690625f*simplex_noise(256.0f*p);
+    sum += 0.001953125f*simplex_noise(512.0f*p);
+    sum += 0.0009765625f*simplex_noise(1024.0f*p);
+    sum += 0.00048828125f*simplex_noise(2048.0f*p);
+    return sum * 0.5f + 0.5f;
+}
 
 __device__ glm::vec2 rotate(glm::vec2 p, float a)
 {
@@ -107,14 +123,14 @@ __device__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noise(0.15f*p+30.0f);
+    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noiseRough(0.15f*p+30.0f);
 }
 
 __device__ float map(glm::vec3 p, float t) {
     float d;
     d =  sdSphere(p, 0.8) + 
           (0.2f*sin(t*0.02f)+0.215f)*0.73f * 
-          fractal_noise(
+          fractal_noiseRough(
               glm::vec3(0.12f*p.x,0.12f*p.y,0.12*p.z) + 
               50.0f + 
               glm::vec3(0.0f,0.0f,0.0001f*t)
