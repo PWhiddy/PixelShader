@@ -107,7 +107,7 @@ __device__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, make_float3(2.5,2.5,2.5));
+    return -sdBox(p, glm::vec3(2.5,2.5,2.5));
 }
 
 __device__ float map(glm::vec3 p, float t) {
