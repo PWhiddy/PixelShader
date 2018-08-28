@@ -13,7 +13,7 @@ __device__ __forceinline__ float hash1( uint n )
     // integer hash copied from Hugo Elias
 	n = (n << 13U) ^ n;
     n = n * (n * n * 15731U + 789221U) + 1376312589U;
-    return float( n & glm::uvec3(0x7fffffffU))/float(0x7fffffff);
+    return float( n & 0x7fffffffU)/float(0x7fffffff);
 }
 
 __device__ __forceinline__ glm::vec3 hash33(glm::vec3 p3)
@@ -35,6 +35,18 @@ __device__ __forceinline__ float hash71( glm::vec3 p, glm::vec3 dir, int t) {
  	float b = hash31(p);
     float c = hash31(dir);
     return hash31(glm::vec3(a,b,c));
+}
+
+// from https://math.stackexchange.com/questions/44689/how-to-find-a-random-axis-or-unit-vector-in-3d
+__device__ __forceinline__ glm::vec3 randomDir( glm::vec3 p, glm::vec3 dir, int t) {
+    float a = hash1( uint(t) );
+ 	float b = hash31(p);
+    float c = hash31(dir);
+    float theta = 6.2831853f*hash31(glm::vec3(a,b,c));
+    float z = 2.0f*hash31( 
+        glm::vec3( c+1.0f, 2.0f*a+3.5f, b*1.56f+9.0f ) ) - 1.0f;
+    float m = sqrt(1.0f-z*z);
+   	return glm::vec3( m*sin(theta), m*cos(theta), z );
 }
 
 __device__ __forceinline__ float simplex_noise(glm::vec3 p)
