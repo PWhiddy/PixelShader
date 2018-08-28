@@ -8,13 +8,33 @@
 //#include "noise.h"
 //#include "cuda_noise.h"
 
-
+__device__ __forceinline__ float hash1( uint n ) 
+{
+    // integer hash copied from Hugo Elias
+	n = (n << 13U) ^ n;
+    n = n * (n * n * 15731U + 789221U) + 1376312589U;
+    return float( n & glm::uvec3(0x7fffffffU))/float(0x7fffffff);
+}
 
 __device__ __forceinline__ glm::vec3 hash33(glm::vec3 p3)
 {
 	p3 = glm::fract(p3 * glm::vec3(.1031f,.11369f,.13787f));
     p3 += glm::dot(p3, glm::vec3(p3.y, p3.x, p3.z)+19.19f);
     return -1.0f + 2.0f * glm::fract(glm::vec3((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y, (p3.y+p3.z)*p3.x));
+}
+
+__device__ __forceinline__ float hash31(glm::vec3 p3)
+{
+	p3  = fract(p3 * glm::vec3(.1031,.11369,.13787));
+    p3 += glm::dot(p3, glm::vec3(p3.y,p3.z,p3.x) + 19.19f);
+    return -1.0f + 2.0f * glm::fract((p3.x + p3.y) * p3.z);
+}
+
+__device__ __forceinline__ float hash71( glm::vec3 p, glm::vec3 dir, int t) {
+    float a = hash1( uint(t) );
+ 	float b = hash31(p);
+    float c = hash31(dir);
+    return hash31(glm::vec3(a,b,c));
 }
 
 __device__ __forceinline__ float simplex_noise(glm::vec3 p)
@@ -73,21 +93,6 @@ __device__ float sdBox( glm::vec3 p, glm::vec3 b )
     glm::vec3 d = glm::abs(p) - b;
       return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
 }
-
-/*
-__device__ float fractalNoise(float3 p) {
-    p += 300.0f;
-    float result = 0.0f;
-    result += rng::simplexNoise(p*1.0, 1.0, 123) * 1.0f;
-    result += rng::simplexNoise(p*2.0, 1.0, 123) * 0.5f;
-    result += rng::simplexNoise(p*4.0, 1.0, 123) * 0.25f;
-    result += rng::simplexNoise(p*8.0, 1.0, 123) * 0.125f;
-    result += rng::simplexNoise(p*16.0, 1.0, 123) * 0.0625f;
-    result += rng::simplexNoise(p*32.0, 1.0, 123) * 0.03125f;
-    result += rng::simplexNoise(p*64.0, 1.0, 123) * 0.015625f;
-    return result;
-}
-*/
 
 __device__ float map(glm::vec3 p, float t) {
     float d;
