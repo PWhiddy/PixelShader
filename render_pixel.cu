@@ -136,14 +136,14 @@ __device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
     return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noiseRough(0.15f*p+30.0f);
 }
 
-__device__ __forceinline__ float map(glm::vec3 p, float t) {
+__device__  float map(glm::vec3 p, float t) {
     float d;
     d = mushSphere(p, t);
     d = fminf(boxDist(p, t), d);
     return d;
 }
 
-__device__ __forceinline__ glm::vec3 calcNormal( glm::vec3 pos, float t )
+__device__  glm::vec3 calcNormal( glm::vec3 pos, float t )
 {
     glm::vec2 e = glm::vec2(1.0,-1.0)*0.5773f*0.0005f;
     return glm::normalize( glm::vec3(e.x,e.y,e.y)*map( pos + glm::vec3(e.x,e.y,e.y), t ) + 
@@ -152,7 +152,7 @@ __device__ __forceinline__ glm::vec3 calcNormal( glm::vec3 pos, float t )
 					  glm::vec3(e.x,e.x,e.x)*map( pos + glm::vec3(e.x,e.x,e.x), t ) );
 }
 
-__device__ __forceinline__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
+__device__  glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
 {
     for (int i=0; i<256; i++) {
         float dist = map(ray_pos, t);
