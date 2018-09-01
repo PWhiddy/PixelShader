@@ -133,7 +133,7 @@ __device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noiseRough(0.15f*p+30.0f);
+    return -sdBox(p, glm::vec3(3.5,2.5,4.5))+0.05*fractal_noiseRough(0.15f*p+30.0f);
 }
 
 __device__  float map(glm::vec3 p, float t) {
@@ -154,10 +154,10 @@ __device__  glm::vec3 calcNormal( glm::vec3 pos, float t )
 
 __device__  glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
 {
-    for (int i=0; i<256; i++) {
+    for (int i=0; i<128; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.25f;
+        ray_pos += dist * ray_dir * 0.6f;
     }
     return ray_pos;
 }
@@ -183,7 +183,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 1.2f;
 
-    const int sample_count = 20;
+    const int sample_count = 120;
 
     glm::vec3 final_color = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -210,8 +210,8 @@ __global__ void render_pixel (
             if (mushSphere(ray_pos, time) < 0.1f) {
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
-            } else if (ray_pos.z > light_height) {
-                incoming += 0.5f;
+            } else if (ray_pos.y > light_height) {
+                incoming += 0.8f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
