@@ -180,7 +180,8 @@ __global__ void render_pixel (
     float uvy = -float(y)/float(y_dim)+0.5;
     uvx *= float(x_dim)/float(y_dim);     
 
-    glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
+    //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
+    float light_height = 1.2f;
 
     const int sample_count = 20;
 
@@ -202,18 +203,19 @@ __global__ void render_pixel (
         glm::vec3 incoming = glm::vec3(0.0f, 0.0f, 0.0f);
 
         const int max_bounces = 6;
-
-
         
         for (int bounce = 0; bounce < max_bounces; bounce++)
         {
             ray_pos = intersect(ray_pos, ray_dir, time);
             if (mushSphere(ray_pos, time) < 0.1f) {
                 color *= glm::vec3(1.0, 0.8, 0.6);
-                incoming += 0.2f;
+                incoming += 0.02f;
+            } else if (ray_pos.z > light_height) {
+                incoming += 0.5f;
+                break;
             } else {
-                color *= glm::vec3(1.0f, 1.0f, 1.0f);
-                incoming += 1.0f*(ray_pos.z+2.5f);
+                color *= glm::vec3(1.0f, 0.2f, 1.0f);
+                incoming += 0.01f;
             }
 
             glm::vec3 normal = calcNormal(ray_pos, time);
