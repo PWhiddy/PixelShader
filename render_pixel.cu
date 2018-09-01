@@ -116,7 +116,7 @@ __device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
     return glm::length(p)-r;
 }
 
-__device__ __forceinline__ mushSphere(glm::vec3 p) {
+__device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
     return sdSphere(p, 0.8) + 
           (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
@@ -138,7 +138,7 @@ __device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
 
 __device__ __forceinline__ float map(glm::vec3 p, float t) {
     float d;
-    d = mushSphere(p);
+    d = mushSphere(p, t);
     d = fminf(boxDist(p, t), d);
     return d;
 }
@@ -208,7 +208,7 @@ __global__ void render_pixel (
         for (int bounce = 0; bounce < max_bounces; bounce++)
         {
             ray_pos = intersect(ray_pos, ray_dir, time);
-            if (mushSphere(ray_pos < 0.1)) {
+            if (mushSphere(ray_pos, time) < 0.1f) {
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.2f;
             } else {
@@ -221,11 +221,11 @@ __global__ void render_pixel (
             float rand = hash71(ray_pos, ray_dir, sample_index);
             if (rand > 0.9f-0.5f) {
                 // specular reflection
-                ray_dir = glm::reflect(ray_dir, n);
+                ray_dir = glm::reflect(ray_dir, normal);
             } else {
                 // diffuse scatter
                 glm::vec3 ndir = randomDir( ray_pos, ray_dir, sample_index+10 );
-                ray_dir = glm::normalize(8.0*(ndir+n*1.002f));
+                ray_dir = glm::normalize(8.0*(ndir+normal*1.002f));
             }
             ray_pos += 0.01f*ray_dir;
 
