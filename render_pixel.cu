@@ -115,6 +115,7 @@ __device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
 
 __device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
     p.z -= 0.8f;
+    p.y += 0.2f*sin(7.0f*p.x+t*0.02);
     return sdSphere(p, 0.8)/* + 
           (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
@@ -177,7 +178,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 2.7f;
 
-    const int aa_size = 64;
+    const int aa_size = 96;
     const int sample_count = aa_size*aa_size;
     const float aa_inv = 1.0f/float(aa_size);
 
@@ -215,7 +216,7 @@ __global__ void render_pixel (
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
             } else if (ray_pos.y > light_height) {
-                incoming += 1.6f;
+                incoming += 1.0f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
@@ -225,8 +226,7 @@ __global__ void render_pixel (
             glm::vec3 normal = calcNormal(ray_pos, time);
 
             float rand = hash71(ray_pos, ray_dir, sample_index);
-            float shiny = fmod(4.0f*(ray_pos.x+ray_pos.y+ray_pos.z), 1.0f);
-            if (rand > shiny*shiny) {
+            if (rand > 0.7f) {
                 // specular reflection
                 ray_dir = glm::reflect(ray_dir, normal);
             } else {
