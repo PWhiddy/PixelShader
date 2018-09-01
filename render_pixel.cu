@@ -157,7 +157,7 @@ __device__  glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
     for (int i=0; i<128; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.9f;
+        ray_pos += dist * ray_dir * 0.8f;
     }
     return ray_pos;
 }
@@ -178,7 +178,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 2.7f;
 
-    const int aa_size = 8;
+    const int aa_size = 16;
     const int sample_count = aa_size*aa_size;
     const float aa_inv = 1.0f/float(aa_size);
 
@@ -216,7 +216,7 @@ __global__ void render_pixel (
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
             } else if (ray_pos.y > light_height) {
-                incoming += 2.0f;
+                incoming += 3.5f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
@@ -225,13 +225,13 @@ __global__ void render_pixel (
 
             glm::vec3 normal = calcNormal(ray_pos, time);
 
-            float rand = hash71(ray_pos, ray_dir, sample_index);
+            float rand = hash31( glm::vec3(hash71(ray_pos, ray_dir, sample_index), time, 1.0));
             if (rand > 0.7f) {
                 // specular reflection
                 ray_dir = glm::reflect(ray_dir, normal);
             } else {
                 // diffuse scatter
-                glm::vec3 ndir = randomDir( ray_pos, ray_dir, sample_index+10 );
+                glm::vec3 ndir = randomDir( glm::vec3(hash31(ray_pos), time, 1.0), ray_dir, sample_index+10 );
                 ray_dir = glm::normalize(8.0f*(ndir+normal*1.002f));
             }
             ray_pos += 0.01f*ray_dir;
