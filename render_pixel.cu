@@ -117,7 +117,7 @@ __device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
 }
 
 __device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
-    p.z += 0.5f;
+    p.z -= 0.8f;
     return sdSphere(p, 0.8) + 
           (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
