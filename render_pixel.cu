@@ -225,7 +225,7 @@ __global__ void render_pixel (
             } else {
                 // diffuse scatter
                 glm::vec3 ndir = randomDir( ray_pos, ray_dir, sample_index+10 );
-                ray_dir = glm::normalize(8.0*(ndir+normal*1.002f));
+                ray_dir = glm::normalize(8.0f*(ndir+normal*1.002f));
             }
             ray_pos += 0.01f*ray_dir;
 
