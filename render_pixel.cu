@@ -106,40 +106,44 @@ __device__ __forceinline__ float fractal_noiseRough(glm::vec3 p) {
     return sum * 0.5f + 0.5f;
 }
 
-__device__ glm::vec2 rotate(glm::vec2 p, float a)
+__device__  __forceinline__ glm::vec2 rotate(glm::vec2 p, float a)
 {
     return glm::vec2(p.x*cos(a) - p.y*sin(a),
                      p.y*cos(a) + p.x*sin(a));
 }
 
-__device__ float sdSphere(glm::vec3 p, float r) {
+__device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
     return glm::length(p)-r;
 }
 
-__device__ float sdBox( glm::vec3 p, glm::vec3 b )
-{
-    glm::vec3 d = glm::abs(p) - b;
-      return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
-}
-
-__device__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noiseRough(0.15f*p+30.0f);
-}
-
-__device__ float map(glm::vec3 p, float t) {
-    float d;
-    d =  sdSphere(p, 0.8) + 
-          (0.2f*sin(t*0.02f)+0.215f)*0.73f * 
+__device__ __forceinline__ mushSphere(glm::vec3 p) {
+    return sdSphere(p, 0.8) + 
+          (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
               glm::vec3(0.12f*p.x,0.12f*p.y,0.12*p.z) + 
               50.0f + 
               glm::vec3(0.0f,0.0f,0.0001f*t)
             );
+}
+
+__device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
+{
+    glm::vec3 d = glm::abs(p) - b;
+      return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
+}
+
+__device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
+    return -sdBox(p, glm::vec3(2.5,2.5,2.5))+0.2*fractal_noiseRough(0.15f*p+30.0f);
+}
+
+__device__ __forceinline__ float map(glm::vec3 p, float t) {
+    float d;
+    d = mushSphere(p);
     d = fminf(boxDist(p, t), d);
     return d;
 }
 
-__device__ glm::vec3 calcNormal( glm::vec3 pos, float t )
+__device__ __forceinline__ glm::vec3 calcNormal( glm::vec3 pos, float t )
 {
     glm::vec2 e = glm::vec2(1.0,-1.0)*0.5773f*0.0005f;
     return glm::normalize( glm::vec3(e.x,e.y,e.y)*map( pos + glm::vec3(e.x,e.y,e.y), t ) + 
@@ -148,9 +152,9 @@ __device__ glm::vec3 calcNormal( glm::vec3 pos, float t )
 					  glm::vec3(e.x,e.x,e.x)*map( pos + glm::vec3(e.x,e.x,e.x), t ) );
 }
 
-__device__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
+__device__ __forceinline__ glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
 {
-    for (int i=0; i<1024; i++) {
+    for (int i=0; i<256; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
         ray_pos += dist * ray_dir * 0.25f;
@@ -178,89 +182,125 @@ __global__ void render_pixel (
 
     glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
 
-    // Set up ray originating from camera
-    glm::vec3 ray_pos = glm::vec3(0.0, 0.0, -1.5);
-    glm::vec2 pos_rot = rotate(glm::vec2(ray_pos.x, ray_pos.z), 0.0);
-    ray_pos.x = pos_rot.x;
-    ray_pos.z = pos_rot.y;
-    glm::vec3 ray_dir = glm::normalize(glm::vec3(uvx,uvy,0.5));
-    glm::vec2 dir_rot = rotate(glm::vec2(ray_dir.x, ray_dir.z), 0.0);
-    ray_dir.x = dir_rot.x;
-    ray_dir.z = dir_rot.y;
+    const int sample_count = 20;
 
-    glm::vec3 color = glm::vec3(0.95,0.92,0.96);
-    const int max_bounces = 6;
-    
-    //for (int bounce = 0; bounce < max_bounces; bounce++)
-    //{
-        ray_pos = intersect(ray_pos, ray_dir, time);
+    glm::vec3 final_color = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    //}
-    
-    
-    glm::vec3 background = glm::vec3(0.87);
-    glm::vec3 normal = calcNormal(ray_pos, time);
-    float value = glm::dot(normal,light_dir);
-    color = glm::vec3(value, value, value);
-    if (boxDist(ray_pos, time) < 0.05) {
-        color.y -= 0.4;
-        color.z -= 0.5;
-    }
-    if (glm::length(ray_pos) > 50.0) color = background;
-    //color = make_float3(rng::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
+    for (int sample_index = 0; sample_index<sample_count; sample_index++) {
 
-    /*
-    const float3 dir_to_light = normalize(light_dir);
-    const float occ_thresh = 0.001;
-    float d_accum = 1.0;
-    float light_accum = 0.0;
-    float temp_accum = 0.0;
-    
+        // Set up ray originating from camera
+        glm::vec3 ray_pos = glm::vec3(0.0, 0.0, -1.5);
+        glm::vec2 pos_rot = rotate(glm::vec2(ray_pos.x, ray_pos.z), 0.0);
+        ray_pos.x = pos_rot.x;
+        ray_pos.z = pos_rot.y;
+        glm::vec3 ray_dir = glm::normalize(glm::vec3(uvx,uvy,0.5));
+        glm::vec2 dir_rot = rotate(glm::vec2(ray_dir.x, ray_dir.z), 0.0);
+        ray_dir.x = dir_rot.x;
+        ray_dir.z = dir_rot.y;
 
-    // Trace ray through volume
-    for (int step=0; step<512; step++) {
-        // At each step, cast occlusion ray towards light source
-        float c_density = get_cellF(ray_pos, vd, volume);
-        float3 occ_pos = ray_pos;
-        ray_pos += ray_dir*step_size;
-        // Don't bother with occlusion ray if theres nothing there
-        if (c_density < occ_thresh) continue;
-        float transparency = 1.0;
-        for (int occ=0; occ<512; occ++) {
-            transparency *= fmax(1.0-get_cellF(occ_pos, vd, volume),0.0);
-            if (transparency < occ_thresh) break;
-            occ_pos += dir_to_light*step_size;
+        glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 incoming = glm::vec3(0.0f, 0.0f, 0.0f);
+
+        const int max_bounces = 6;
+
+
+        
+        for (int bounce = 0; bounce < max_bounces; bounce++)
+        {
+            ray_pos = intersect(ray_pos, ray_dir, time);
+            if (mushSphere(ray_pos < 0.1)) {
+                color *= glm::vec3(1.0, 0.8, 0.6);
+                incoming += 0.2f;
+            } else {
+                color *= glm::vec3(1.0f, 1.0f, 1.0f);
+                incoming += 1.0f*(ray_pos.z+2.5f);
+            }
+
+            glm::vec3 normal = calcNormal(ray_pos, time);
+
+            float rand = hash71(ray_pos, ray_dir, sample_index);
+            if (rand > 0.9f-0.5f) {
+                // specular reflection
+                ray_dir = glm::reflect(ray_dir, n);
+            } else {
+                // diffuse scatter
+                glm::vec3 ndir = randomDir( ray_pos, ray_dir, sample_index+10 );
+                ray_dir = glm::normalize(8.0*(ndir+n*1.002f));
+            }
+            ray_pos += 0.01f*ray_dir;
+
         }
-        d_accum *= fmax(1.0-c_density,0.0);
-        light_accum += d_accum*c_density*transparency;
-        if (d_accum < occ_thresh) break;
-    }
-    
-    // gamma correction
-    light_accum = pow(light_accum, 0.45);
-    */
-    
-    //const float conv_range = 2.3283064365387e-10;
-    /*
-    float val = hash2intfloat(x,y)*conv_range;
-    color.x = val;
-    color.y = val;
-    color.z = val;
-    */
 
-    //float4 rand = randomInt44( make_uint4( x, y, 5, time_step ) );
-    //color.x = __uint2float_rd(rand.x) * conv_range;
-    //color.y = __uint2float_rd(rand.y) * conv_range;
-    //color.z = __uint2float_rd(rand.z) * conv_range;
-    
-    //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
-    //float val = 0.5;
-    //glm::vec3 position = glm::vec3(float(x)*0.01f, float(y)*0.01f, 1.0f);
-    //val = fractal_noise(position);
-    //val = 0.5f*simplex_noise(position) + 0.5f;
+        final_color += incoming*color;
+        
+        /*
+        glm::vec3 background = glm::vec3(0.87);
+        glm::vec3 normal = calcNormal(ray_pos, time);
+        float value = glm::dot(normal,light_dir);
+        color = glm::vec3(value, value, value);
+        if (boxDist(ray_pos, time) < 0.05) {
+            color.y -= 0.4;
+            color.z -= 0.5;
+        }
+        if (glm::length(ray_pos) > 50.0) color = background;
+        //color = make_float3(rng::simplexNoise(make_float3(uvx*25.0,uvy*25.0,0.0)+100.0, 1.0, 123));
+        */
+
+        /*
+        const float3 dir_to_light = normalize(light_dir);
+        const float occ_thresh = 0.001;
+        float d_accum = 1.0;
+        float light_accum = 0.0;
+        float temp_accum = 0.0;
+        
+
+        // Trace ray through volume
+        for (int step=0; step<512; step++) {
+            // At each step, cast occlusion ray towards light source
+            float c_density = get_cellF(ray_pos, vd, volume);
+            float3 occ_pos = ray_pos;
+            ray_pos += ray_dir*step_size;
+            // Don't bother with occlusion ray if theres nothing there
+            if (c_density < occ_thresh) continue;
+            float transparency = 1.0;
+            for (int occ=0; occ<512; occ++) {
+                transparency *= fmax(1.0-get_cellF(occ_pos, vd, volume),0.0);
+                if (transparency < occ_thresh) break;
+                occ_pos += dir_to_light*step_size;
+            }
+            d_accum *= fmax(1.0-c_density,0.0);
+            light_accum += d_accum*c_density*transparency;
+            if (d_accum < occ_thresh) break;
+        }
+        
+        // gamma correction
+        light_accum = pow(light_accum, 0.45);
+        */
+        
+        //const float conv_range = 2.3283064365387e-10;
+        /*
+        float val = hash2intfloat(x,y)*conv_range;
+        color.x = val;
+        color.y = val;
+        color.z = val;
+        */
+
+        //float4 rand = randomInt44( make_uint4( x, y, 5, time_step ) );
+        //color.x = __uint2float_rd(rand.x) * conv_range;
+        //color.y = __uint2float_rd(rand.y) * conv_range;
+        //color.z = __uint2float_rd(rand.z) * conv_range;
+        
+        //float val = fractal4( make_float4( float(x)*0.002f, float(y)*0.002f, 6.0f, float(time_step)*0.07f ) );
+        //float val = 0.5;
+        //glm::vec3 position = glm::vec3(float(x)*0.01f, float(y)*0.01f, 1.0f);
+        //val = fractal_noise(position);
+        //val = 0.5f*simplex_noise(position) + 0.5f;
+    }
+
+    final_color /= float(sample_count);
 
     const int pixel = 3*((y-y_offset)*x_dim+x);
-    image[pixel+0] = (uint8_t)(fmin(255.0f*color.x, 255.0f));
-    image[pixel+1] = (uint8_t)(fmin(255.0f*color.y, 255.0f));
-    image[pixel+2] = (uint8_t)(fmin(255.0f*color.z, 255.0f));
+    image[pixel+0] = (uint8_t)(fmin(255.0f*final_color.x, 255.0f));
+    image[pixel+1] = (uint8_t)(fmin(255.0f*final_color.y, 255.0f));
+    image[pixel+2] = (uint8_t)(fmin(255.0f*final_color.z, 255.0f));
 }
