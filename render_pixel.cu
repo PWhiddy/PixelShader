@@ -117,6 +117,7 @@ __device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
 }
 
 __device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
+    p.z += 0.5f;
     return sdSphere(p, 0.8) + 
           (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
@@ -133,7 +134,7 @@ __device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(3.5,2.5,4.5))+0.05*fractal_noiseRough(0.15f*p+30.0f);
+    return -sdBox(p, glm::vec3(3.5,2.5,4.5))+0.02*fractal_noiseRough(0.15f*p+30.0f);
 }
 
 __device__  float map(glm::vec3 p, float t) {
@@ -174,20 +175,25 @@ __global__ void render_pixel (
     if (x >= x_dim || y >= y_dim) return;
 
     float time = float(time_step);
-    
-    // Create Normalized UV image coordinates
-    float uvx =  float(x)/float(x_dim)-0.5;
-    float uvy = -float(y)/float(y_dim)+0.5;
-    uvx *= float(x_dim)/float(y_dim);     
 
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 1.2f;
 
-    const int sample_count = 120;
+    const int aa_size = 16;
+    const int sample_count = aa_size*aa_size;
+    const float aa_inv = 1.0f/float(aa_size);
 
     glm::vec3 final_color = glm::vec3(0.0f, 0.0f, 0.0f);
 
     for (int sample_index = 0; sample_index<sample_count; sample_index++) {
+
+        float aa_x = float(sample_index % 16)*aa_inv;
+        float aa_y = float(sample_index / 16)*aa_inv;
+
+        // Create Normalized UV image coordinates
+        float uvx =  (float(x)+aa_x)/float(x_dim)-0.5;
+        float uvy = -(float(y)+aa_y)/float(y_dim)+0.5;
+        uvx *= float(x_dim)/float(y_dim);     
 
         // Set up ray originating from camera
         glm::vec3 ray_pos = glm::vec3(0.0, 0.0, -1.5);
@@ -211,7 +217,7 @@ __global__ void render_pixel (
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
             } else if (ray_pos.y > light_height) {
-                incoming += 0.8f;
+                incoming += 1.0f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
