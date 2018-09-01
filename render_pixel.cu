@@ -177,7 +177,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 2.7f;
 
-    const int aa_size = 48;
+    const int aa_size = 64;
     const int sample_count = aa_size*aa_size;
     const float aa_inv = 1.0f/float(aa_size);
 
@@ -206,7 +206,7 @@ __global__ void render_pixel (
         glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
         glm::vec3 incoming = glm::vec3(0.0f, 0.0f, 0.0f);
 
-        const int max_bounces = 4;
+        const int max_bounces = 6;
         
         for (int bounce = 0; bounce < max_bounces; bounce++)
         {
@@ -215,7 +215,7 @@ __global__ void render_pixel (
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
             } else if (ray_pos.y > light_height) {
-                incoming += 1.0f;
+                incoming += 1.6f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
@@ -225,7 +225,8 @@ __global__ void render_pixel (
             glm::vec3 normal = calcNormal(ray_pos, time);
 
             float rand = hash71(ray_pos, ray_dir, sample_index);
-            if (rand > 0.9f-0.2f) {
+            float shiny = 0.3333f*(fmod(ray_pos.x, 1.0f) + fmod(ray_pos.y, 1.0f) + fmod(ray_pos.z, 1.0f)) 
+            if (rand > shiny) {
                 // specular reflection
                 ray_dir = glm::reflect(ray_dir, normal);
             } else {
