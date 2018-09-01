@@ -178,7 +178,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 2.7f;
 
-    const int aa_size = 96;
+    const int aa_size = 8;
     const int sample_count = aa_size*aa_size;
     const float aa_inv = 1.0f/float(aa_size);
 
@@ -186,8 +186,8 @@ __global__ void render_pixel (
 
     for (int sample_index = 0; sample_index<sample_count; sample_index++) {
 
-        float aa_x = float(sample_index % 16)*aa_inv;
-        float aa_y = float(sample_index / 16)*aa_inv;
+        float aa_x = float(sample_index % aa_size)*aa_inv;
+        float aa_y = float(sample_index / aa_size)*aa_inv;
 
         // Create Normalized UV image coordinates
         float uvx =  (float(x)+aa_x)/float(x_dim)-0.5;
@@ -216,7 +216,7 @@ __global__ void render_pixel (
                 color *= glm::vec3(1.0, 0.8, 0.6);
                 incoming += 0.02f;
             } else if (ray_pos.y > light_height) {
-                incoming += 1.0f;
+                incoming += 2.0f;
                 break;
             } else {
                 color *= glm::vec3(1.0f, 0.2f, 1.0f);
