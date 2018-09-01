@@ -100,9 +100,6 @@ __device__ __forceinline__ float fractal_noiseRough(glm::vec3 p) {
     sum += 0.225625f*simplex_noise(64.0f*p);
     sum += 0.1078125*simplex_noise(128.0f*p);
     sum += 0.02690625f*simplex_noise(256.0f*p);
-    sum += 0.006953125f*simplex_noise(512.0f*p);
-    sum += 0.0013765625f*simplex_noise(1024.0f*p);
-    sum += 0.00048828125f*simplex_noise(2048.0f*p);
     return sum * 0.5f + 0.5f;
 }
 
@@ -118,13 +115,13 @@ __device__ __forceinline__ float sdSphere(glm::vec3 p, float r) {
 
 __device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
     p.z -= 0.8f;
-    return sdSphere(p, 0.8) + 
+    return sdSphere(p, 0.8)/* + 
           (0.2f*sin(t*0.02f)+0.215f)*0.23f * 
           fractal_noiseRough(
               glm::vec3(0.12f*p.x,0.12f*p.y,0.12*p.z) + 
               50.0f + 
               glm::vec3(0.0f,0.0f,0.0001f*t)
-            );
+            )*/;
 }
 
 __device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
@@ -135,7 +132,7 @@ __device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
 }
 
 __device__ __forceinline__ float boxDist(glm::vec3 p, float t) {
-    return -sdBox(p, glm::vec3(3.5,2.5,4.5))+0.02*fractal_noiseRough(0.15f*p+30.0f);
+    return -sdBox(p, glm::vec3(3.5,2.5,4.5));//+0.02*fractal_noiseRough(0.15f*p+30.0f);
 }
 
 __device__  float map(glm::vec3 p, float t) {
@@ -159,7 +156,7 @@ __device__  glm::vec3 intersect(glm::vec3 ray_pos, glm::vec3 ray_dir, float t)
     for (int i=0; i<128; i++) {
         float dist = map(ray_pos, t);
         if (dist < 0.002 || dist > 100.0) break;
-        ray_pos += dist * ray_dir * 0.6f;
+        ray_pos += dist * ray_dir * 0.9f;
     }
     return ray_pos;
 }
@@ -209,7 +206,7 @@ __global__ void render_pixel (
         glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
         glm::vec3 incoming = glm::vec3(0.0f, 0.0f, 0.0f);
 
-        const int max_bounces = 6;
+        const int max_bounces = 4;
         
         for (int bounce = 0; bounce < max_bounces; bounce++)
         {
