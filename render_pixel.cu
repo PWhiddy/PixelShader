@@ -225,8 +225,8 @@ __global__ void render_pixel (
             glm::vec3 normal = calcNormal(ray_pos, time);
 
             float rand = hash71(ray_pos, ray_dir, sample_index);
-            float shiny = 0.3333f*(fmod(9.0f*ray_pos.x, 1.0f) + fmod(9.0f*ray_pos.y, 1.0f) + fmod(9.0f*ray_pos.z, 1.0f));
-            if (rand > shiny) {
+            float shiny = fmod(4.0f*(ray_pos.x+ray_pos.y+ray_pos.z), 1.0);
+            if (rand > shiny*shiny) {
                 // specular reflection
                 ray_dir = glm::reflect(ray_dir, normal);
             } else {
