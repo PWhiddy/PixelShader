@@ -45,7 +45,7 @@ void render_images(int x_dim, int y_dim, int t_dim) {
 
     uint8_t *img = new uint8_t[3*x_dim*y_dim];
 
-    for (int time_step = 0; time_step < t_dim; time_step++) {
+    for (int time_step = 115; time_step < t_dim; time_step++) {
         
         std::cout << "Step " << time_step+1 << "\n";
 
