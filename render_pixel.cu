@@ -129,7 +129,7 @@ __device__ __forceinline__ float mushSphere(glm::vec3 p, float t) {
 
 __device__ __forceinline__ float sdBox( glm::vec3 p, glm::vec3 b )
 {
-    p.y -= 1.0f;
+    p.y -= 1.5f;
     glm::vec3 d = glm::abs(p) - b;
     return glm::min(glm::max(d.x,glm::max(d.y,d.z)),0.0f) + glm::length(glm::max(d,glm::vec3(0.0f)));
 }
@@ -178,7 +178,7 @@ __global__ void render_pixel (
     float time = float(time_step);
 
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
-    float light_height = 2.2f;
+    float light_height = 2.7f;
 
     const int aa_size = 32;
     const int sample_count = aa_size*aa_size;
