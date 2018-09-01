@@ -177,7 +177,7 @@ __global__ void render_pixel (
     //glm::vec3 light_dir = glm::normalize(glm::vec3(0.1, 1.0, -0.5));
     float light_height = 2.7f;
 
-    const int aa_size = 32;
+    const int aa_size = 48;
     const int sample_count = aa_size*aa_size;
     const float aa_inv = 1.0f/float(aa_size);
 
@@ -225,7 +225,7 @@ __global__ void render_pixel (
             glm::vec3 normal = calcNormal(ray_pos, time);
 
             float rand = hash71(ray_pos, ray_dir, sample_index);
-            if (rand > 0.9f-0.5f) {
+            if (rand > 0.9f-0.2f) {
                 // specular reflection
                 ray_dir = glm::reflect(ray_dir, normal);
             } else {
